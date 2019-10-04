@@ -1,0 +1,72 @@
+{
+  "name": "react-fast-forms",
+  "version": "1.0.0",
+  "description": "School portal react app",
+  "main": "dist/main.js",
+  "types": "./src/index.d.ts",
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --watch --mode development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/sprintive/schools-portal.git"
+  },
+  "keywords": [
+    "react",
+    "school",
+    "portal"
+  ],
+  "author": "Sprintive",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/sprintive/schools-portal#readme",
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "@types/react": "^16.9.5",
+    "@types/react-dom": "^16.9.1",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.1.0",
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.2.0",
+    "gulp-livereload": "^4.0.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-rtlcss": "^1.4.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "jest": "^24.9.0",
+    "node-sass": "^4.12.0",
+    "patch-package": "^6.2.0",
+    "react-test-renderer": "^16.10.2",
+    "redux": "^4.0.4",
+    "source-map-loader": "^0.2.4",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^6.2.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.38.0",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "axios": "^0.19.0",
+    "font-awesome-sass": "^4.7.0",
+    "lodash": "^4.17.15",
+    "react": "^16.8.6",
+    "react-autocomplete": "^1.8.1",
+    "react-bootstrap": "^1.0.0-beta.11",
+    "react-date-picker": "^7.8.1",
+    "react-datepicker": "^2.9.6",
+    "react-dom": "^16.8.6",
+    "react-dropzone": "^10.1.7",
+    "react-quill": "^1.3.3",
+    "react-router-dom": "^5.0.1",
+    "react-tooltip-lite": "^1.10.0",
+    "react-transition-group": "^4.2.2",
+    "react-trello": "^2.2.3",
+    "reactjs-popup": "^1.5.0",
+    "style-it": "^2.1.4",
+    "styled-components": "^4.3.2"
+  }
+}
