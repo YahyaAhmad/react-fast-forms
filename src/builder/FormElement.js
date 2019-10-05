@@ -1,8 +1,10 @@
+import { forEach } from "lodash";
+
 export class FormElement {
   constructor(element) {
     this.element = element;
     this.props = {
-      fields: {}
+      fields: []
     };
     this.elementType = null;
     this.formProps = {};
@@ -49,11 +51,20 @@ export class FormElement {
     return this.props.fields;
   };
 
-  addField = (field, name) => {
-    if (!this.props.fields) {
-      this.props.fields = {};
-    }
-    this.props.fields[name] = field;
+  addField = field => {
+    this.props.fields.push(field);
     return this;
+  };
+
+  /**
+   * Add a collection of fields in one go.
+   *
+   * @param {FormElement[]} fields
+   */
+  addFields = (...fields) => {
+    console.log(fields);
+    forEach(fields, field => {
+      this.addField(field);
+    });
   };
 }

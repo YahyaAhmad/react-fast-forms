@@ -83,12 +83,13 @@ export default class Form extends React.Component {
     const Component = element.getComponent();
     const elementProps = element.getProps();
     if (element.getType() == "container") {
+      console.log(element.getElements());
       const subElements = map(element.getElements(), subElement => {
         return this.renderElement(subElement);
       });
       if (collectionisEmpty(subElements)) {
         throw new Error(
-          "You are trying to render a container without any sub elements."
+          "You are trying to render a container without any sub elements. That's illegal."
         );
       }
       return <Component {...elementProps}>{subElements}</Component>;
@@ -190,6 +191,10 @@ export default class Form extends React.Component {
     );
   }
 }
+
+Form.propTypes = {
+  fields: PropTypes.instanceOf(ContainerElement).isRequired
+};
 
 const formProps = {
   value: null,

@@ -3,7 +3,7 @@ declare module "react-fast-forms" {
   import { Function } from "@babel/types";
   export class ContainerElement {}
   type ElementProps = "name" | "label" | "items";
-  export type FieldElement = {
+  export interface FieldElement {
     setLabel: (label: string) => FieldElement;
     setDefaultValue: (value: any) => FieldElement;
     setPlaceholder: (placeholder: string) => FieldElement;
@@ -13,7 +13,7 @@ declare module "react-fast-forms" {
     isRequired: () => boolean;
     /**
      * Sets the validator function of the field.
-     * 
+     *
      * ```
      * (value, setError) => {
      *    if(!isEmail(value)) {
@@ -23,15 +23,25 @@ declare module "react-fast-forms" {
      * ```
      */
     setValidator: () => FieldElement;
-  };
+  }
+
+  export interface ContainerElement  {
+    setLabel: (label: string) => ContainerElement;
+    addField: (element: FormElement) => ContainerElement;
+    addFields: (...elements: FormElement) => ContainerElement;
+  }
   type HTMLTag = "div" | "section" | "fieldset" | "form" | "table";
   interface FormProps {
     /**
      * The container elemnets object, used to construct the main container of the form. Use the [createContainer]() function to begin constucting fields.
      *
      * ```
-     * let fields = createContainer(SomeContainerComponent).setLabel("My Container").addField(createField(SomeFieldComponent,"some_name"));
-     * return fields;
+     * let mainContainer = createContainer(SomeContainerComponent).setLabel("My Container");
+     * let nameField = createField(TextField,"name").setLabel("Name").setPlaceHolder("Name");
+     * let titleField = createField(SelectField,"title").setLabel("Title").setProp("items",{mr: "Mr", mrs: "Mrs"});
+     * mainContainer.addFields(nameField, titleField);
+     *
+     * <Form fields={mainContainer} />
      * ```
      *
      */
@@ -68,4 +78,8 @@ declare module "react-fast-forms" {
     field: React.ComponentClass,
     name: string
   ): FieldElement;
+
+  export function createContainer(
+    container: React.ComponentClass
+  ): ContainerElement;
 }
