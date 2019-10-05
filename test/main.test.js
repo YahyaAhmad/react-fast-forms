@@ -24,45 +24,13 @@ describe("Field Element", () => {
     expect(field.getErrorMessage()).toEqual("There is an error");
   });
 
-  it("Field validator works in a form", () => {
-    let submitted = false;
-
-    let mainContainer = createContainer(GenericContainer).setLabel(
-      "My Container"
-    );
-    let field1 = createField(GenericField, "normalField");
-    let field2 = createField(GenericField, "customRequiredField").setValidator(
-      (value, setError) => {
-        if (value == "error value") {
-          setError("There is an error");
-        }
-      }
-    );
-    mainContainer.addFields(field1, field2);
-
-    const form = TestRenderer.create(
-      <Form onSubmit={value => (submitted = true)} fields={mainContainer} />
-    );
-    const instance = form.getInstance();
-    instance.handleChange("some value", "normalField");
-    instance.handleSubmit();
-    expect(submitted).toEqual(true);
-    instance.handleChange("error value", "customRequiredField");
-    submitted = false;
-    instance.handleSubmit();
-    expect(submitted).toEqual(false);
-    instance.handleChange("success value", "customRequiredField");
-    instance.handleSubmit();
-    expect(submitted).toEqual(true);
+  it("Field dependency works", () => {
+    let dependentField = createField(null, "dependent");
+    dependentField.setDependency("dependency");
+    dependentField.setLabel("My {dependency}");
+    let newProps = dependentField.replaceDependencies("Field");
+    expect(newProps.label).toEqual("My Field");
   });
-
-  //   it("Field dependency works", () => {
-  //     let dependentField = createField(null, "dependent");
-  //     dependentField.setDependency("dependency");
-  //     dependentField.setLabel("My {dependency}");
-  //     dependentField.replaceDependencies("Field");
-  //     expect(dependentField.getLabel()).toEqual("My Field");
-  //   });
 });
 
 describe("Form", () => {
@@ -104,6 +72,38 @@ describe("Form", () => {
     expect(submitted).toEqual(true);
   });
 
+  it("Field validator works in a form", () => {
+    let submitted = false;
+
+    let mainContainer = createContainer(GenericContainer).setLabel(
+      "My Container"
+    );
+    let field1 = createField(GenericField, "normalField");
+    let field2 = createField(GenericField, "customRequiredField").setValidator(
+      (value, setError) => {
+        if (value == "error value") {
+          setError("There is an error");
+        }
+      }
+    );
+    mainContainer.addFields(field1, field2);
+
+    const form = TestRenderer.create(
+      <Form onSubmit={value => (submitted = true)} fields={mainContainer} />
+    );
+    const instance = form.getInstance();
+    instance.handleChange("some value", "normalField");
+    instance.handleSubmit();
+    expect(submitted).toEqual(true);
+    instance.handleChange("error value", "customRequiredField");
+    submitted = false;
+    instance.handleSubmit();
+    expect(submitted).toEqual(false);
+    instance.handleChange("success value", "customRequiredField");
+    instance.handleSubmit();
+    expect(submitted).toEqual(true);
+  });
+
   it("Data should change as expected", () => {
     const form = TestRenderer.create(
       <Form onSubmit={values => (submitted = true)} fields={mainContainer} />
@@ -138,5 +138,21 @@ describe("Form", () => {
     expect(
       mainContainerRoot.findAllByProps({ className: "dependent-field" })[0]
     ).toBeDefined();
+  });
+
+  it("Should omit empty or invalid values on submit", () => {
+    let submittedData = {};
+    const form = TestRenderer.create(
+      <Form
+        onSubmit={values => (submittedData = values)}
+        fields={mainContainer}
+      />
+    );
+    const instance = form.getInstance();
+    instance.handleChange("", "field1");
+    instance.handleChange("some value", "field2");
+    expect(instance.state.data).toEqual({ field1: "", field2: "some value" });
+    instance.handleSubmit();
+    expect(submittedData).toEqual({ field2: "some value" });
   });
 });
