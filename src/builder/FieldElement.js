@@ -1,5 +1,5 @@
 import { FormElement } from "./FormElement";
-
+import { cloneDeep } from "lodash";
 /**
  * Creates a new field element
  *
@@ -80,16 +80,17 @@ export class FieldElement extends FormElement {
     return this.dependsOn;
   }
   replaceDependencies(value) {
-    Object.keys(this.props).map(key => {
-      if (typeof this.props[key] === "object" && this.props[key] !== null) {
-        this.props[key] = this.replaceDependencies(this.props[key]);
-      } else if (typeof this.props[key] === "string") {
-        this.props[key] = this.props[key].replace(
+    let props = cloneDeep(this.props);
+    Object.keys(props).map(key => {
+      if (typeof props[key] === "object" && props[key] !== null) {
+        props[key] = this.replaceDependencies(props[key]);
+      } else if (typeof props[key] === "string") {
+        props[key] = this.props[key].replace(
           `{${this.getDependency()}}`,
           value
         );
       }
     });
-    return this;
+    return props;
   }
 }

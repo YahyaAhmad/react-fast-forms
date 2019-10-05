@@ -23,9 +23,10 @@ declare module "react-fast-forms" {
      * ```
      */
     setValidator: () => FieldElement;
+    setDependency: (dependency: string) => FieldElement;
   }
 
-  export interface ContainerElement  {
+  export interface ContainerElement {
     setLabel: (label: string) => ContainerElement;
     addField: (element: FormElement) => ContainerElement;
     addFields: (...elements: FormElement) => ContainerElement;

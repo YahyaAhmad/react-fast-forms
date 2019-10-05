@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { classNames } from "../../helpers/Helper";
 export default class GenericContainer extends Component {
   render() {
     let { subElements, tag, label, className } = this.props;
-    let containerClass = `form-container ${className}`.trim();
+    let containerClass = classNames("form-container", className);
     const Tag = tag;
     return (
       <React.Fragment>

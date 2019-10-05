@@ -56,20 +56,23 @@ describe("Field Element", () => {
     expect(submitted).toEqual(true);
   });
 
-  it("Field dependency works", () => {
-    let dependentField = createField(null, "dependent");
-    dependentField.setDependency("dependency");
-    dependentField.setLabel("My {dependency}");
-    dependentField.replaceDependencies("Field");
-    expect(dependentField.getLabel()).toEqual("My Field");
-  });
+  //   it("Field dependency works", () => {
+  //     let dependentField = createField(null, "dependent");
+  //     dependentField.setDependency("dependency");
+  //     dependentField.setLabel("My {dependency}");
+  //     dependentField.replaceDependencies("Field");
+  //     expect(dependentField.getLabel()).toEqual("My Field");
+  //   });
 });
 
 describe("Form", () => {
   let mainContainer = createContainer(GenericContainer).setLabel(
     "My Container"
   );
-  let field1 = createField(GenericField, "field1");
+  let field1 = createField(GenericField, "field1").setProp(
+    "className",
+    "field1"
+  );
   let field2 = createField(GenericField, "field2")
     .setLabel("Test")
     .setRequired();
@@ -113,5 +116,27 @@ describe("Form", () => {
       field1: "some value",
       field2: "other value"
     });
+  });
+
+  it("Field A should not render when it is depndent on field B when its value is not defined", () => {
+    let dependentField = createField(GenericField, "dependentField")
+      .setLabel("Label is depndent on {field1}")
+      .setProp("className", "dependent-field")
+      .setDependency("field1");
+    mainContainer.addField(dependentField);
+    const form = TestRenderer.create(
+      <Form onSubmit={values => (submitted = true)} fields={mainContainer} />
+    );
+    const root = form.root;
+    let mainContainerRoot = form.root.findByProps({
+      className: "form-container"
+    });
+    expect(
+      mainContainerRoot.findAllByProps({ className: "dependent-field" })[0]
+    ).toBeUndefined();
+    form.getInstance().handleChange("some value", "field1");
+    expect(
+      mainContainerRoot.findAllByProps({ className: "dependent-field" })[0]
+    ).toBeDefined();
   });
 });

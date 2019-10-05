@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { map, isEmpty as collectionisEmpty, forEach, pickBy } from "lodash";
+import {
+  map,
+  isEmpty as collectionisEmpty,
+  forEach,
+  pickBy,
+  cloneDeep
+} from "lodash";
 import { ContainerElement } from "../builder/ContainerElement";
 import { FormElement } from "../builder/FormElement";
 import { FieldElement } from "../builder/FieldElement";
@@ -70,19 +76,18 @@ export default class Form extends React.Component {
       value: this.state.data[element.getName()],
       error: this.state.errors[element.getName()],
       onChange: this.handleChange,
-      name: element.getName(),
-      label: element.getLabel()
+      name: element.getName()
     };
   };
 
   /**
    * Render an element and its subElements.
    *
-   * @param {import('../builder/FieldElement').FieldElement} element
+   * @param {import('../builder/FormElement').FormElement} element
    */
   renderElement = (element, key = -1) => {
     const Component = element.getComponent();
-    const elementProps = element.getProps();
+    let elementProps = element.getProps();
     if (element.getType() == "container") {
       const subElements = map(element.getElements(), (subElement, key) => {
         return this.renderElement(subElement, key);
@@ -100,10 +105,25 @@ export default class Form extends React.Component {
       );
     } else {
       const formProps = this.getFormProps(element);
+      /** @type {FieldElement} */
+      let field = element;
       // Add to fields variable for future uses.
-      this.fields.push(element);
+      this.fields.push(field);
+      // If the field is dependent on another one.
+      if (field.getDependency()) {
+        // If the value of the dependency field is not set, hide the dependent field
+        if (!this.validateValue(this.state.data[field.dependsOn])) {
+          return null;
+        }
+        // If the value exists, replace the dependency strings in the dependent field
+        elementProps = field.replaceDependencies(this.state.data[field.dependsOn]);
+      }
       return (
-        <ElementContainer key={element.getName()} {...formProps}>
+        <ElementContainer
+          key={field.getName()}
+          label={elementProps.label}
+          {...formProps}
+        >
           <Component {...elementProps} />
         </ElementContainer>
       );
