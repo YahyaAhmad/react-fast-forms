@@ -4,7 +4,7 @@ import {
   isEmpty as collectionisEmpty,
   forEach,
   pickBy,
-  cloneDeep
+  isPlainObject
 } from "lodash";
 import { ContainerElement } from "../builder/ContainerElement";
 import { FormElement } from "../builder/FormElement";
@@ -15,8 +15,8 @@ import { classNames } from "../helpers/Helper";
 export default class Form extends React.Component {
   static defaultProps = {
     tag: "div",
-    className: null,
-    id: null,
+    className: undefined,
+    id: undefined,
     submitLabel: "Submit",
     renderButtons: (handler, label) => {
       return (
@@ -105,6 +105,7 @@ export default class Form extends React.Component {
       );
     } else {
       const formProps = this.getFormProps(element);
+
       /** @type {FieldElement} */
       let field = element;
       // Add to fields variable for future uses.
@@ -116,7 +117,9 @@ export default class Form extends React.Component {
           return null;
         }
         // If the value exists, replace the dependency strings in the dependent field
-        elementProps = field.replaceDependencies(this.state.data[field.dependsOn]);
+        elementProps = field.replaceDependencies(
+          this.state.data[field.dependsOn]
+        );
       }
       return (
         <ElementContainer
@@ -142,10 +145,12 @@ export default class Form extends React.Component {
 
   validateValue = value => {
     return (
-      value !== null &&
-      value !== undefined &&
-      value !== "" &&
-      value.length !== 0
+      (typeof value !== "object" &&
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        value.length !== 0) ||
+      (typeof value === "object" && !collectionisEmpty(value))
     );
   };
 
@@ -160,10 +165,8 @@ export default class Form extends React.Component {
       let name = field.getName();
       let fieldValue = this.state.data[name];
       // Check if required fields are present in the form data.
-      if (field.isRequired()) {
-        if (!this.validateValue(fieldValue)) {
-          this.setError(name, renderFieldMessage(requiredMessage));
-        }
+      if (field.isRequired() && !this.validateValue(fieldValue)) {
+        this.setError(name, renderFieldMessage(requiredMessage));
       }
       // Call the field validator
       field.validate(fieldValue);
@@ -192,7 +195,7 @@ export default class Form extends React.Component {
   handleSubmit = () => {
     this.validateForm();
     if (this.validated) {
-      let data = pickBy(this.state.data, value => {
+      let data = pickBy(this.state.data, (value, key) => {
         return this.validateValue(value);
       });
       this.props.onSubmit(data);

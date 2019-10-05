@@ -17,6 +17,7 @@ export class FieldElement extends FormElement {
   constructor(element, name) {
     super(element);
     this.props.name = name;
+    this.props.fields = [];
     this.validator = () => true;
     this.error = false;
     this.errorMessage = "This field is not valid";
@@ -79,9 +80,17 @@ export class FieldElement extends FormElement {
   getDependency() {
     return this.dependsOn;
   }
+  addField = element => {
+    if (element.isRequired()) {
+      this.setRequired();
+    }
+    this.props.fields.push(element);
+    return this;
+  };
   replaceDependencies(value) {
     let props = cloneDeep(this.props);
     Object.keys(props).map(key => {
+      if (key === "fields") return;
       if (typeof props[key] === "object" && props[key] !== null) {
         props[key] = this.replaceDependencies(props[key]);
       } else if (typeof props[key] === "string") {

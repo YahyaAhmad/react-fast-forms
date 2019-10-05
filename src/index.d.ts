@@ -11,6 +11,8 @@ declare module "react-fast-forms" {
     setProp: (prop: ElementProps, value: any) => FieldElement;
     setRequired: (required: boolean = true) => FieldElement;
     isRequired: () => boolean;
+    addField: (element: FormElement) => FieldElement;
+    addFields: (...elements: FormElement) => FieldElement
     /**
      * Sets the validator function of the field.
      *
@@ -21,7 +23,7 @@ declare module "react-fast-forms" {
      *    }
      * }
      * ```
-     */
+     */;
     setValidator: () => FieldElement;
     setDependency: (dependency: string) => FieldElement;
   }

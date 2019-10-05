@@ -60,9 +60,10 @@ export class FormElement {
    *
    * @param {FormElement[]} fields
    */
-  addFields = (...fields) => {
+  addFields = fields => {
     forEach(fields, field => {
       this.addField(field);
     });
+    return this;
   };
 }

@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Form should render expectedly 1`] = `
+<div
+  className="react-main-form"
+>
+  <label
+    className="form-container-title"
+  >
+    My Container
+  </label>
+  <div
+    className="form-container"
+  >
+    <div
+      className="form-field-container field-field1-container"
+    >
+      <label
+        className="form-field-label"
+      />
+      <input
+        className="field1"
+        onChange={[Function]}
+        type="text"
+      />
+    </div>
+    <div
+      className="form-field-container field-field2-container"
+    >
+      <label
+        className="form-field-label"
+      >
+        Test
+      </label>
+      <input
+        onChange={[Function]}
+        type="text"
+      />
+    </div>
+  </div>
+  <div
+    className="form-actions"
+  >
+    <div
+      className="form-action"
+    >
+      <button
+        onClick={[Function]}
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</div>
+`;

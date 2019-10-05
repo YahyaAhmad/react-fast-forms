@@ -8,7 +8,7 @@ export default class ElementContainer extends Component {
   };
   render = () => {
     const { label, name, children, error } = this.props;
-    const formProps = pick(this.props, "onChange", "setError", "name");
+    const formProps = pick(this.props, "onChange", "setError", "name", "error");
     const elementContainerClass = `form-field-container field-${name}-container`;
     let fieldElement = React.cloneElement(children, {
       ...formProps,

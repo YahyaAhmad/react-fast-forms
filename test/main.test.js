@@ -44,12 +44,15 @@ describe("Form", () => {
   let field2 = createField(GenericField, "field2")
     .setLabel("Test")
     .setRequired();
-  mainContainer.addFields(field1, field2);
+  mainContainer.addFields([field1, field2]);
+
+  it("should render expectedly", () => {
+    const form = TestRenderer.create(<Form fields={mainContainer} />).toJSON();
+    expect(form).toMatchSnapshot();
+  });
 
   it("Render the main container with 2 fields", () => {
-    const form = TestRenderer.create(
-      <Form onSubmit={values => (submitted = true)} fields={mainContainer} />
-    );
+    const form = TestRenderer.create(<Form fields={mainContainer} />);
     expect(form.toJSON().children[1].children.length).toEqual(2);
   });
   it("Should not submit when there is a field that is required but empty", () => {
@@ -86,7 +89,7 @@ describe("Form", () => {
         }
       }
     );
-    mainContainer.addFields(field1, field2);
+    mainContainer.addFields([field1, field2]);
 
     const form = TestRenderer.create(
       <Form onSubmit={value => (submitted = true)} fields={mainContainer} />
@@ -142,17 +145,33 @@ describe("Form", () => {
 
   it("Should omit empty or invalid values on submit", () => {
     let submittedData = {};
+    let container = createContainer(GenericContainer).addField(
+      createField(GenericField, "field1")
+    );
     const form = TestRenderer.create(
-      <Form
-        onSubmit={values => (submittedData = values)}
-        fields={mainContainer}
-      />
+      <Form onSubmit={values => (submittedData = values)} fields={container} />
     );
     const instance = form.getInstance();
     instance.handleChange("", "field1");
-    instance.handleChange("some value", "field2");
-    expect(instance.state.data).toEqual({ field1: "", field2: "some value" });
+    instance.handleChange({}, "field2");
+    instance.handleChange([], "field3");
+    instance.handleChange(null, "field4");
+    instance.handleChange(false, "correctValue1");
+    instance.handleChange("some value", "correctValue2");
+
+    expect(instance.state.data).toEqual({
+      field1: "",
+      field2: {},
+      field3: [],
+      field4: null,
+      correctValue1: false,
+      correctValue2: "some value"
+    });
     instance.handleSubmit();
-    expect(submittedData).toEqual({ field2: "some value" });
+    expect(submittedData).toEqual({
+      correctValue1: false,
+      correctValue2: "some value"
+    });
+    instance.handleChange;
   });
 });
