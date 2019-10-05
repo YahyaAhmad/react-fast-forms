@@ -3,9 +3,8 @@ import { forEach } from "lodash";
 export class FormElement {
   constructor(element) {
     this.element = element;
-    this.props = {
-      fields: []
-    };
+    this.props = {};
+    this.fields = [];
     this.elementType = null;
     this.formProps = {};
   }
@@ -45,14 +44,14 @@ export class FormElement {
   /**
    * Returns sub elements of the element.
    *
-   * @returns {Element[]}
+   * @returns {FormElement[]}
    */
   getElements = () => {
-    return this.props.fields;
+    return this.fields;
   };
 
   addField = field => {
-    this.props.fields.push(field);
+    this.fields.push(field);
     return this;
   };
 
@@ -62,7 +61,6 @@ export class FormElement {
    * @param {FormElement[]} fields
    */
   addFields = (...fields) => {
-    console.log(fields);
     forEach(fields, field => {
       this.addField(field);
     });

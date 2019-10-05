@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { map, isEmpty as collectionisEmpty, forEach } from "lodash";
+import { map, isEmpty as collectionisEmpty, forEach, pickBy } from "lodash";
 import { ContainerElement } from "../builder/ContainerElement";
 import { FormElement } from "../builder/FormElement";
 import { FieldElement } from "../builder/FieldElement";
@@ -22,7 +22,8 @@ export default class Form extends React.Component {
     requiredMessage: "This field is required!",
     renderFieldMessage: message => {
       return <div className="form-error-message">{message}</div>;
-    }
+    },
+    onSubmit: values => console.log("Submitted these values: ", values)
   };
   constructor(props) {
     super(props);
@@ -79,26 +80,30 @@ export default class Form extends React.Component {
    *
    * @param {import('../builder/FieldElement').FieldElement} element
    */
-  renderElement = element => {
+  renderElement = (element, key = -1) => {
     const Component = element.getComponent();
     const elementProps = element.getProps();
     if (element.getType() == "container") {
-      console.log(element.getElements());
-      const subElements = map(element.getElements(), subElement => {
-        return this.renderElement(subElement);
+      const subElements = map(element.getElements(), (subElement, key) => {
+        return this.renderElement(subElement, key);
       });
       if (collectionisEmpty(subElements)) {
         throw new Error(
           "You are trying to render a container without any sub elements. That's illegal."
         );
       }
-      return <Component {...elementProps}>{subElements}</Component>;
+
+      return (
+        <Component key={key} {...elementProps}>
+          {subElements}
+        </Component>
+      );
     } else {
       const formProps = this.getFormProps(element);
       // Add to fields variable for future uses.
       this.fields.push(element);
       return (
-        <ElementContainer {...formProps}>
+        <ElementContainer key={element.getName()} {...formProps}>
           <Component {...elementProps} />
         </ElementContainer>
       );
@@ -167,7 +172,10 @@ export default class Form extends React.Component {
   handleSubmit = () => {
     this.validateForm();
     if (this.validated) {
-      console.log("Submitted");
+      let data = pickBy(this.state.data, value => {
+        return this.validateValue(value);
+      });
+      this.props.onSubmit(data);
     }
     this.validated = true;
   };
@@ -179,7 +187,6 @@ export default class Form extends React.Component {
   };
 
   render() {
-    console.log(this.state);
     const { tag, className, id } = this.props;
     const formClasses = classNames("react-main-form", className);
     const Tag = tag;

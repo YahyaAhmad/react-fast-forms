@@ -6,7 +6,7 @@ import { FormElement } from "./FormElement";
  * @param {Function} field
  * @param {string} name
  *
- * @returns {import('.').FieldElement}
+ * @returns {FieldElement}
  */
 export function createField(field, name) {
   let fieldObject = new FieldElement(field, name);
