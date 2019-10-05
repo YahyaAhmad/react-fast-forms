@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import FieldElement from "../../builder/FieldElement";
 export default class GenericContainer extends Component {
   render() {
     let { subElements, tag, label, className } = this.props;

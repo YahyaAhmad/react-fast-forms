@@ -1,0 +1,197 @@
+import React, { Component } from "react";
+import { map, isEmpty as collectionisEmpty, forEach } from "lodash";
+import { ContainerElement } from "../builder/ContainerElement";
+import { FormElement } from "../builder/FormElement";
+import { FieldElement } from "../builder/FieldElement";
+import ElementContainer from "../elements/ElementContainer";
+import PropTypes from "prop-types";
+import { classNames } from "../helpers/Helper";
+export default class Form extends React.Component {
+  static defaultProps = {
+    tag: "div",
+    className: null,
+    id: null,
+    submitLabel: "Submit",
+    renderButtons: (handler, label) => {
+      return (
+        <div className="form-action">
+          <button onClick={handler}>{label}</button>
+        </div>
+      );
+    },
+    requiredMessage: "This field is required!",
+    renderFieldMessage: message => {
+      return <div className="form-error-message">{message}</div>;
+    }
+  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: {},
+      errors: {}
+    };
+    /** @type {FieldElement[]} */
+    this.fields = [];
+    /** @type {boolean} */
+    this.validated = true;
+  }
+  /**
+   * Gets the fields to build them.
+   *
+   * @returns {ContainerElement} A container element that contains fields.
+   */
+  getMainContainer = () => {
+    return this.props.fields;
+  };
+
+  /**
+   * Handles any change of value of a field.
+   *
+   * @param {any} value
+   * @param {string} name
+   *
+   */
+  handleChange = (value, name) => {
+    let newData = this.state.data;
+    newData[name] = value;
+    this.setState({ data: newData });
+  };
+
+  /**
+   * Gets the main form props.
+   *
+   * @param {FieldElement} element
+   *
+   * @returns {formProps}
+   */
+  getFormProps = element => {
+    return {
+      value: this.state.data[element.getName()],
+      error: this.state.errors[element.getName()],
+      onChange: this.handleChange,
+      name: element.getName(),
+      label: element.getLabel()
+    };
+  };
+
+  /**
+   * Render an element and its subElements.
+   *
+   * @param {import('../builder/FieldElement').FieldElement} element
+   */
+  renderElement = element => {
+    const Component = element.getComponent();
+    const elementProps = element.getProps();
+    if (element.getType() == "container") {
+      const subElements = map(element.getElements(), subElement => {
+        return this.renderElement(subElement);
+      });
+      if (collectionisEmpty(subElements)) {
+        throw new Error(
+          "You are trying to render a container without any sub elements."
+        );
+      }
+      return <Component {...elementProps}>{subElements}</Component>;
+    } else {
+      const formProps = this.getFormProps(element);
+      // Add to fields variable for future uses.
+      this.fields.push(element);
+      return (
+        <ElementContainer {...formProps}>
+          <Component {...elementProps} />
+        </ElementContainer>
+      );
+    }
+  };
+
+  setError = (name, errorMessage) => {
+    const { showSingleErrorMessage } = this.props;
+    if (this.validated || !showSingleErrorMessage) {
+      this.validated = false;
+      let newErrors = this.state.errors;
+      newErrors[name] = errorMessage;
+      this.setState({ errors: newErrors });
+    }
+  };
+
+  validateValue = value => {
+    return (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      value.length !== 0
+    );
+  };
+
+  /**
+   * Validates the form data.
+   */
+  validateForm = () => {
+    const { requiredMessage, renderFieldMessage } = this.props;
+    // Clean the existing errors
+    this.setState({ errors: {} });
+    forEach(this.fields, field => {
+      let name = field.getName();
+      let fieldValue = this.state.data[name];
+      // Check if required fields are present in the form data.
+      if (field.isRequired()) {
+        if (!this.validateValue(fieldValue)) {
+          this.setError(name, renderFieldMessage(requiredMessage));
+        }
+      }
+      // Call the field validator
+      field.validate(fieldValue);
+      if (field.hasError()) {
+        this.setError(name, renderFieldMessage(field.getErrorMessage()));
+      }
+    });
+    // Call the custom prop validator.
+
+    return this.validated;
+  };
+
+  /**
+   * Render all fields.
+   *
+   * @returns {React.ComponentClass}
+   */
+  renderFields = () => {
+    return this.renderElement(this.getMainContainer());
+  };
+
+  /**
+   * Handles the form submition.
+   *
+   */
+  handleSubmit = () => {
+    this.validateForm();
+    if (this.validated) {
+      console.log("Submitted");
+    }
+    this.validated = true;
+  };
+
+  renderButtons = () => {
+    const { submitLabel, renderButtons } = this.props;
+    let buttons = renderButtons(this.handleSubmit, submitLabel);
+    return <div className="form-actions">{buttons}</div>;
+  };
+
+  render() {
+    console.log(this.state);
+    const { tag, className, id } = this.props;
+    const formClasses = classNames("react-main-form", className);
+    const Tag = tag;
+    return (
+      <Tag className={formClasses} id={id}>
+        {this.renderFields()}
+        {this.renderButtons()}
+      </Tag>
+    );
+  }
+}
+
+const formProps = {
+  value: null,
+  error: null
+};

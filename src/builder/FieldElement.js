@@ -1,20 +1,25 @@
-import FormElement from "./FormElement";
+import { FormElement } from "./FormElement";
 
 /**
  * Creates a new field element
  *
  * @param {Function} field
  * @param {string} name
+ *
+ * @returns {import('.').FieldElement}
  */
 export function createField(field, name) {
   let fieldObject = new FieldElement(field, name);
   return fieldObject;
 }
 
-export default class FieldElement extends FormElement {
+export class FieldElement extends FormElement {
   constructor(element, name) {
     super(element);
     this.props.name = name;
+    this.validator = () => true;
+    this.error = false;
+    this.errorMessage = "This field is not valid";
     this.elementType = "field";
   }
   getName = () => {
@@ -35,7 +40,6 @@ export default class FieldElement extends FormElement {
     this.props.options.placeholder = placeholder;
     return this;
   }
-
   setMultiple(multiple = true) {
     this.props.multiple = multiple;
     return this;
@@ -50,43 +54,31 @@ export default class FieldElement extends FormElement {
   isRequired() {
     return this.props.required;
   }
-  setItems(items) {
-    this.props.items = items;
+  setValidator = validator => {
+    this.validator = validator;
     return this;
-  }
-  getItems() {
-    return this.props.items;
-  }
-
+  };
+  validate = value => {
+    this.error = false;
+    this.validator(value, this.setError);
+  };
+  setError = errorMessage => {
+    this.error = true;
+    this.errorMessage = errorMessage;
+  };
+  hasError = () => {
+    return this.error;
+  };
+  getErrorMessage = () => {
+    return this.errorMessage;
+  };
   setDependency(name) {
     this.dependsOn = name;
     return this;
   }
-  setContainer(container) {
-    this.container = container;
-    return this;
-  }
-  getContainer() {
-    return this.container ? this.container : EmptyContainer;
-  }
-  setContainerProps(props) {
-    this.containerProps = props;
-    return this;
-  }
-  getContainerProps() {
-    return this.containerProps;
-  }
-  setContainerLabel(label) {
-    this.containerLabel = label;
-    return this;
-  }
-  getContainerLabel() {
-    return this.containerLabel;
-  }
   getDependency() {
     return this.dependsOn;
   }
-
   replaceDependencies(value) {
     Object.keys(this.props).map(key => {
       if (typeof this.props[key] === "object" && this.props[key] !== null) {

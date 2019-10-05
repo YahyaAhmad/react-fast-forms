@@ -1,11 +1,19 @@
-import FormElement from "./FormElement";
+import { FormElement } from "./FormElement";
 
+/**
+ *
+ * Creates a container
+ *
+ * @param {React.ComponentClass} container
+ *
+ * @returns {ContainerElement}
+ */
 export function createContainer(container) {
   let containerObject = new ContainerElement(container);
   return containerObject;
 }
 
-export default class ContainerElement extends FormElement {
+export class ContainerElement extends FormElement {
   constructor(element) {
     super(element);
     this.elementType = "container";

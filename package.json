@@ -2,8 +2,7 @@
   "name": "react-fast-forms",
   "version": "1.0.0",
   "description": "School portal react app",
-  "main": "dist/main.js",
-  "types": "./src/index.d.ts",
+  "main": "./build/index.js",
   "scripts": {
     "build": "webpack --mode production",
     "watch": "webpack --watch --mode development"
