@@ -16,7 +16,7 @@ export default class ElementContainer extends Component {
     });
     return (
       <div className={elementContainerClass}>
-        {error}
+        {error ? error : null}
         {label && <label className="form-field-label">{label}</label>}
         {fieldElement}
       </div>

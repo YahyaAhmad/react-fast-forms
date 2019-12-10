@@ -50,6 +50,8 @@ export default class Form extends React.Component {
     this.fields = [];
     /** @type {boolean} */
     this.validated = true;
+    /** @type {object} */
+    this.errors = {};
   }
 
   /**
@@ -152,9 +154,7 @@ export default class Form extends React.Component {
     const { showSingleErrorMessage } = this.props;
     if (this.validated || !showSingleErrorMessage) {
       this.validated = false;
-      let newErrors = this.state.errors;
-      newErrors[name] = errorMessage;
-      this.setState({ errors: newErrors });
+      this.errors[name] = errorMessage;
     }
   };
 
@@ -175,7 +175,7 @@ export default class Form extends React.Component {
   validateForm = () => {
     const { requiredMessage, renderFieldMessage } = this.props;
     // Clean the existing errors
-    this.setState({ errors: {} });
+    this.errors = {};
     forEach(this.fields, field => {
       let name = field.getName();
       let fieldValue = this.state.data[name];
@@ -191,6 +191,8 @@ export default class Form extends React.Component {
     });
     // Call the custom prop validator.
 
+    // Set the state of errors.
+    this.setState({ errors: this.errors });
     return this.validated;
   };
 
