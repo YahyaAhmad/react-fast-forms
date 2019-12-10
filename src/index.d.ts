@@ -52,6 +52,8 @@ declare module "react-fast-forms" {
     tag: HTMLTag;
     className: string;
     id: string;
+    onSubmit: (values:object) => {};
+    resetForm: boolean;
     submitLabel: string;
     /**
      * ```

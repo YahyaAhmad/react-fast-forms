@@ -1,5 +1,7 @@
 import { FormElement } from "./FormElement";
 import { cloneDeep } from "lodash";
+import { GenericField } from "..";
+import OptionsField from "../elements/fields/OptionsField";
 /**
  * Creates a new field element
  *
@@ -9,7 +11,24 @@ import { cloneDeep } from "lodash";
  * @returns {FieldElement}
  */
 export function createField(field, name) {
-  let fieldObject = new FieldElement(field, name);
+  let fieldObject;
+  if (typeof field === "string") {
+    switch (field) {
+      case "options":
+        fieldObject = new FieldElement(OptionsField, name);
+        break;
+      case "textarea":
+        fieldObject = new FieldElement(GenericField, name);
+        fieldObject.setProp("tag", "textarea");
+        break;
+      default:
+        fieldObject = new FieldElement(GenericField, name);
+        fieldObject.setProp("type", field);
+        break;
+    }
+  } else {
+    fieldObject = new FieldElement(field, name);
+  }
   return fieldObject;
 }
 
@@ -87,19 +106,20 @@ export class FieldElement extends FormElement {
     this.props.fields.push(element);
     return this;
   };
-  replaceDependencies(value) {
-    let props = cloneDeep(this.props);
-    Object.keys(props).map(key => {
+  recursiveReplaceDependenceis = (object, value) => {
+    Object.keys(object).map(key => {
       if (key === "fields") return;
-      if (typeof props[key] === "object" && props[key] !== null) {
-        props[key] = this.replaceDependencies(props[key]);
-      } else if (typeof props[key] === "string") {
-        props[key] = this.props[key].replace(
-          `{${this.getDependency()}}`,
-          value
-        );
+      if (typeof object[key] === "object" && object[key] !== null) {
+        object[key] = this.recursiveReplaceDependenceis(object[key], value);
+      } else if (typeof object[key] === "string") {
+        object[key] = object[key].replace(`{${this.getDependency()}}`, value);
       }
     });
+    return object;
+  };
+  replaceDependencies(value) {
+    let props = cloneDeep(this.props);
+    props = this.recursiveReplaceDependenceis(props, value);
     return props;
   }
 }

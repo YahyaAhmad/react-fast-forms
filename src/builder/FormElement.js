@@ -3,10 +3,13 @@ import { forEach } from "lodash";
 export class FormElement {
   constructor(element) {
     this.element = element;
-    this.props = {};
+    this.props = {
+      options: {}
+    };
     this.fields = [];
     this.elementType = null;
     this.formProps = {};
+  
   }
   getFormProps = () => {
     return this.formProps;

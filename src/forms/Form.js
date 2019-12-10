@@ -25,6 +25,7 @@ export default class Form extends React.Component {
         </div>
       );
     },
+    resetForm: true,
     requiredMessage: "This field is required!",
     renderFieldMessage: message => {
       return <div className="form-error-message">{message}</div>;
@@ -33,15 +34,24 @@ export default class Form extends React.Component {
   };
   constructor(props) {
     super(props);
+    // Set default values.
+    let defaultValues = {};
+    props.fields.getElements().map(field => {
+      if (field.elementType == "field" && field.getDefaultValue()) {
+        defaultValues[field.getName()] = field.getDefaultValue();
+      }
+    });
     this.state = {
-      data: {},
+      data: defaultValues,
       errors: {}
     };
+    console.log(this.state);
     /** @type {FieldElement[]} */
     this.fields = [];
     /** @type {boolean} */
     this.validated = true;
   }
+
   /**
    * Gets the fields to build them.
    *
@@ -121,15 +131,20 @@ export default class Form extends React.Component {
           this.state.data[field.dependsOn]
         );
       }
-      return (
-        <ElementContainer
-          key={field.getName()}
-          label={elementProps.label}
-          {...formProps}
-        >
-          <Component {...elementProps} />
-        </ElementContainer>
-      );
+
+      if (field.getType() == "hidden") {
+        return <Component {...elementProps} />;
+      } else {
+        return (
+          <ElementContainer
+            key={field.getName()}
+            label={elementProps.label}
+            {...formProps}
+          >
+            <Component {...elementProps} />
+          </ElementContainer>
+        );
+      }
     }
   };
 
@@ -199,8 +214,18 @@ export default class Form extends React.Component {
         return this.validateValue(value);
       });
       this.props.onSubmit(data);
+      if (this.props.resetForm) {
+        this.resetForm();
+      }
     }
     this.validated = true;
+  };
+
+  /**
+   * Resets all the values of the form
+   */
+  resetForm = () => {
+    this.setState({ data: {} });
   };
 
   renderButtons = () => {
