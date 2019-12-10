@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "School portal react app",
   "main": "./build/index.js",
-  "module": "./src/index.d.ts",
+  "types": "./src/index.d.ts",
   "scripts": {
     "build": "webpack --mode production",
     "watch": "webpack --watch --mode development",
