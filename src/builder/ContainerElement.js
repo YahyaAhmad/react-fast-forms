@@ -1,4 +1,5 @@
 import { FormElement } from "./FormElement";
+import { GenericContainer } from "..";
 
 /**
  *
@@ -9,7 +10,8 @@ import { FormElement } from "./FormElement";
  * @returns {ContainerElement}
  */
 export function createContainer(container) {
-  let containerObject = new ContainerElement(container);
+  let containerElement = container ? container : GenericContainer;
+  let containerObject = new ContainerElement(containerElement);
   return containerObject;
 }
 

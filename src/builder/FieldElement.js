@@ -41,6 +41,8 @@ export class FieldElement extends FormElement {
     this.error = false;
     this.errorMessage = "This field is not valid";
     this.elementType = "field";
+    this.ignored = false;
+    this.render = true;
   }
   getName = () => {
     return this.props.name;
@@ -74,10 +76,23 @@ export class FieldElement extends FormElement {
   isRequired() {
     return this.props.required;
   }
+
+  /**
+   * Sets the validator function of the field.
+   *
+   * ```
+   * (value, setError) => {
+   *    if(!isEmail(value)) {
+   *      setError("Invalid Email!");
+   *    }
+   * }
+   * ```
+   */
   setValidator = validator => {
     this.validator = validator;
     return this;
   };
+
   validate = value => {
     this.error = false;
     this.validator(value, this.setError);
@@ -106,6 +121,17 @@ export class FieldElement extends FormElement {
     this.props.fields.push(element);
     return this;
   };
+  setIgnored = (ignored = true) => {
+    this.ignored = ignored;
+    return this;
+  };
+  isIgnored = () => this.ignored;
+
+  setRender = (render = true) => {
+    this.render = render;
+    return this;
+  };
+  isRendered = () => this.render;
   recursiveReplaceDependenceis = (object, value) => {
     Object.keys(object).map(key => {
       if (key === "fields") return;

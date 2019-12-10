@@ -4,10 +4,10 @@ import {
   isEmpty as collectionisEmpty,
   forEach,
   pickBy,
-  isPlainObject
+  merge,
+  find
 } from "lodash";
 import { ContainerElement } from "../builder/ContainerElement";
-import { FormElement } from "../builder/FormElement";
 import { FieldElement } from "../builder/FieldElement";
 import ElementContainer from "../elements/ElementContainer";
 import PropTypes from "prop-types";
@@ -18,6 +18,8 @@ export default class Form extends React.Component {
     className: undefined,
     id: undefined,
     submitLabel: "Submit",
+    defaultValues: {},
+    method: "post",
     renderButtons: (handler, label) => {
       return (
         <div className="form-action">
@@ -42,10 +44,9 @@ export default class Form extends React.Component {
       }
     });
     this.state = {
-      data: defaultValues,
+      data: merge(props.defaultValues, defaultValues),
       errors: {}
     };
-    console.log(this.state);
     /** @type {FieldElement[]} */
     this.fields = [];
     /** @type {boolean} */
@@ -120,6 +121,10 @@ export default class Form extends React.Component {
 
       /** @type {FieldElement} */
       let field = element;
+      // If the field is ignored, we don't render it.
+      if (!field.isRendered()) {
+        return;
+      }
       // Add to fields variable for future uses.
       this.fields.push(field);
       // If the field is dependent on another one.
@@ -213,12 +218,10 @@ export default class Form extends React.Component {
     this.validateForm();
     if (this.validated) {
       let data = pickBy(this.state.data, (value, key) => {
-        return this.validateValue(value);
+        let field = find(this.fields, field => field.getName() == key);
+        return this.validateValue(value) && field && !field.isIgnored();
       });
-      this.props.onSubmit(data);
-      if (this.props.resetForm) {
-        this.resetForm();
-      }
+      this.props.onSubmit(data,this.resetForm);
     }
     this.validated = true;
   };

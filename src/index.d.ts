@@ -3,7 +3,7 @@ declare module "react-fast-forms" {
   import { Function } from "@babel/types";
   export class ContainerElement {}
   type ElementProps = "name" | "label" | "items";
-  export interface FieldElement {
+   interface FieldElement {
     setLabel: (label: string) => FieldElement;
     setDefaultValue: (value: any) => FieldElement;
     setPlaceholder: (placeholder: string) => FieldElement;
@@ -11,8 +11,12 @@ declare module "react-fast-forms" {
     setProp: (prop: ElementProps, value: any) => FieldElement;
     setRequired: (required: boolean = true) => FieldElement;
     isRequired: () => boolean;
+    setRender: (required: boolean = true) => FieldElement;
+    isRendered: () => boolean;
+    setIgnored: (required: boolean = true) => FieldElement;
+    isIgnored: () => boolean;
     addField: (element: FormElement) => FieldElement;
-    addFields: (...elements: FormElement) => FieldElement
+    addFields: (...elements: FormElement) => FieldElement;
     /**
      * Sets the validator function of the field.
      *
@@ -23,8 +27,8 @@ declare module "react-fast-forms" {
      *    }
      * }
      * ```
-     */;
-    setValidator: () => FieldElement;
+     */
+    setValidator: (value:string,setError: (value:string) => void) => FieldElement;
     setDependency: (dependency: string) => FieldElement;
   }
 
@@ -34,6 +38,7 @@ declare module "react-fast-forms" {
     addFields: (...elements: FormElement) => ContainerElement;
   }
   type HTMLTag = "div" | "section" | "fieldset" | "form" | "table";
+  type InputType = "hidden" | "text" | "textarea";
   interface FormProps {
     /**
      * The container elemnets object, used to construct the main container of the form. Use the [createContainer]() function to begin constucting fields.
@@ -52,8 +57,8 @@ declare module "react-fast-forms" {
     tag: HTMLTag;
     className: string;
     id: string;
+    defaultValues: any;
     onSubmit: (values:object) => {};
-    resetForm: boolean;
     submitLabel: string;
     /**
      * ```
@@ -80,7 +85,7 @@ declare module "react-fast-forms" {
   export class Form extends React.Component<FormProps> {}
 
   export function createField(
-    field: React.ComponentClass,
+    field: React.ComponentClass | InputType,
     name: string
   ): FieldElement;
 
