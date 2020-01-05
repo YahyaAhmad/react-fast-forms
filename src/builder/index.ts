@@ -1,6 +1,8 @@
+import { mapValues } from 'lodash';
 import { isValidElement } from "react";
 import GenericContainer from "../elements/GenericContainer";
 import GenericField from "../elements/GenericField";
+import { Data } from "../Form";
 
 export interface ElementInterface<T> {
     label: string
@@ -23,9 +25,11 @@ export interface ElementInterface<T> {
 export interface FieldInterface {
     validator: ValidatorFunction
     errorMessage: string
-    value: any
+    defaultValue: any
     required: boolean
     rendered: boolean
+    ignored: boolean
+    dependency: string
     setValidator: (validator: ValidatorFunction) => Field
     validate: (value: any) => boolean
     setError: (error: string) => void
@@ -34,6 +38,13 @@ export interface FieldInterface {
     isRequired: () => boolean
     setRendered: (rendered: boolean) => Field
     isRendered: () => boolean
+    setIgnored: (ignored: boolean) => Field
+    isIgnored: () => boolean
+    setDefaultValue: (value: any) => Field
+    getDefaultValue: () => any
+    setDependency: (dependency: string) => Field
+    getDependency: () => string
+    replaceDependencies: (value: any, object: Data) => Field
 }
 
 export interface ContainerInterface {
@@ -46,6 +57,7 @@ export interface ContainerInterface {
 type SetErrorFunction = (message: string) => void;
 type ValidatorFunction = (value: string, setError: SetErrorFunction) => void;
 export class Field implements FieldInterface, ElementInterface<Field> {
+    ignored: boolean;
     required: boolean = false;
     rendered: boolean = true;
     label: string;
@@ -54,8 +66,9 @@ export class Field implements FieldInterface, ElementInterface<Field> {
     type: string = "field"
     validator: ValidatorFunction = (value, setError) => null;
     errorMessage: string = null;
-    value: any = null;
+    defaultValue: any = null;
     props: any = {};
+    dependency: string;
     getLabel = () => {
         return this.label;
     }
@@ -103,6 +116,7 @@ export class Field implements FieldInterface, ElementInterface<Field> {
         return this;
     }
     getProps = () => this.props;
+
     setProp = (key: string, value: string) => {
         this.props[key] = value;
         return this;
@@ -112,11 +126,66 @@ export class Field implements FieldInterface, ElementInterface<Field> {
         return this;
     };
     isRequired = () => this.required;
+
     setRendered = (rendered: boolean = true) => {
         this.rendered = rendered;
         return this;
     };
     isRendered = () => this.rendered;
+
+    isIgnored = () => this.ignored;
+
+    setIgnored = (ignored: boolean = true) => {
+        this.ignored = ignored;
+        return this;
+    };
+    setDefaultValue = (value: any) => {
+        this.defaultValue = value;
+        return this;
+    }
+    getDefaultValue = () => this.defaultValue
+
+    setDependency = (dependency: string) => {
+        this.dependency = dependency;
+        return this;
+    }
+
+    getDependency = () => this.dependency
+    replaceDependencies = (replace: any, object: Data = null) => {
+        let defaultValue;
+        if (object === null) {
+            object = { ...this.props };
+            // Replace default value.
+            if (this.defaultValue) {
+                defaultValue = this.defaultValue.replace(`{${this.getDependency()}}`, replace);
+            }
+        }
+
+        object = mapValues(object, (value, key) => {
+            if (typeof value === "object") {
+                return this.replaceDependencies(replace, value);
+            } else if (typeof value === "string") {
+                let newValue = value.replace(`{${this.getDependency()}}`, replace);
+                return newValue;
+            }
+        });
+        let clone = this.clone();
+        clone.setDefaultValue(defaultValue);
+        clone.setProps(object);
+        return clone;
+    }
+    public clone(): Field {
+        var cloneObj = new Field();
+        cloneObj.setName(this.getName());
+        cloneObj.setRequired(this.isRequired());
+        cloneObj.setRendered(this.isRendered());
+        cloneObj.setIgnored(this.isIgnored());
+        cloneObj.setValidator(this.validator);
+        cloneObj.setLabel(this.getLabel());
+        cloneObj.setComponent(this.getComponent());
+        return cloneObj;
+    }
+
 }
 
 export class Container implements ContainerInterface, ElementInterface<Container> {
@@ -149,7 +218,7 @@ export class Container implements ContainerInterface, ElementInterface<Container
         return this;
     };
     addFields = (fields: Field[]) => {
-        this.fields.concat(fields);
+        this.fields = this.fields.concat(fields);
         return this;
     };
 
@@ -172,7 +241,7 @@ export function createContainer(component: React.FC = GenericContainer, name: st
     container.setName(name);
     return container;
 }
-type FormInputType = "text" | "password" | "select" | "date" | "textarea";
+type FormInputType = "text" | "password" | "select" | "date" | "textarea" | "hidden";
 
 export function createField(component: React.FC | FormInputType, name: string) {
     if (!name) {
@@ -183,7 +252,8 @@ export function createField(component: React.FC | FormInputType, name: string) {
     if (typeof component === "string") {
         switch (component) {
             case "textarea":
-                throw new Error("Textarea is not implemented");
+            case "select":
+                field.setProp("tag", component);
                 break;
             default:
                 field.setProp("type", component);

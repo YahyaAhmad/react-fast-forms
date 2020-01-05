@@ -46,10 +46,16 @@ export const useContainer: ContainerHook = (defaultValues: Props = {}) => {
  */
 export const useField: FieldHook = (defaultValues: Props = {}) => {
     const { fieldProps, name } = useContext(FieldContext);
-    const { onChange, data } = useContext(FormContext);
+    const { onChange, data, allFields } = useContext(FormContext);
 
-    const handleChange = (value: any) => {
-        onChange(name, value);
+    const handleChange = (value: any, fieldName: string = name) => {
+        let dependentFields = allFields.filter(field => field.getDependency() == name);
+        dependentFields.forEach(field => {
+            let replacedField = field.replaceDependencies(value);
+            let replacedValue = replacedField.getDefaultValue();
+            onChange(field.getName(), replacedValue);
+        });
+        onChange(fieldName, value);
     }
 
     let newProps = merge(defaultValues, fieldProps);

@@ -18440,16 +18440,17 @@ var ContainerManager_1 = __importDefault(__webpack_require__(/*! ./elements/Cont
 var lodash_1 = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 exports.FormContext = React.createContext(null);
 var addedFields = [];
+var allFields = [];
 var Form = function (props) {
-    var container = props.container, debug = props.debug, onSubmit = props.onSubmit, onChange = props.onChange, attributes = props.attributes;
+    var container = props.container, debug = props.debug, onSubmit = props.onSubmit, onChange = props.onChange, attributes = props.attributes, defaultValues = props.defaultValues, submitLabel = props.submitLabel;
     var _a = React.useState({}), data = _a[0], setData = _a[1];
     var _b = React.useState({}), errors = _b[0], setErrors = _b[1];
     var _c = React.useState(null), render = _c[0], setRender = _c[1];
     var elements = container.getFields();
     var handleChange = function (name, value) {
-        var newData = __assign({}, data);
+        var newData = {};
         newData[name] = value;
-        setData(newData);
+        setData(function (prevData) { return (__assign(__assign({}, prevData), newData)); });
     };
     var handleSubmit = function (e) {
         e.preventDefault();
@@ -18463,13 +18464,14 @@ var Form = function (props) {
     };
     var isValid = function (value) { return !(value === null || value === undefined || value === "" || value === {} || value === "{}" || value === []); };
     var setError = function (name, errorMessage) {
-        var newErrors = __assign({}, errors);
+        var newErrors = {};
         newErrors[name] = errorMessage;
-        setErrors(newErrors);
+        setErrors(function (prevErrors) { return (__assign(__assign({}, prevErrors), newErrors)); });
     };
     var validateForm = function () {
         var valid = true;
         setErrors({});
+        console.log(errors);
         var submittedData = __assign({}, data);
         addedFields.map(function (field) {
             var name = field.getName();
@@ -18482,12 +18484,20 @@ var Form = function (props) {
                 }
                 submittedData = lodash_1.omit(submittedData, name);
             }
-            // Check the custom validator
+            // Check the custom field validator
             if (isValid(value)) {
                 if (!field.validate(value)) {
                     setError(name, field.getError());
+                    valid = false;
                 }
             }
+            // Remove ignored values
+            if (field.isIgnored()) {
+                submittedData = lodash_1.omit(submittedData, name);
+            }
+            submittedData = lodash_1.pickBy(submittedData, function (value, key) {
+                return addedFields.find(function (field) { return field.getName() == key; });
+            });
         });
         return valid ? submittedData : false;
     };
@@ -18503,7 +18513,24 @@ var Form = function (props) {
                         React.createElement(ContainerComponent, null))));
             }
             else if (element instanceof builder_1.Field) {
-                addedFields.push(element);
+                // Check if the field is able to be rendered.
+                if (!element.isRendered()) {
+                    return renderElements;
+                }
+                // Replace the dependencies if exist.
+                var dependency = element.getDependency();
+                if (dependency) {
+                    if (isValid(data[dependency])) {
+                        addedFields.push(element);
+                        element = element.replaceDependencies(data[dependency]);
+                    }
+                    else {
+                        return renderElements;
+                    }
+                }
+                else {
+                    addedFields.push(element);
+                }
                 renderElements = (React.createElement(React.Fragment, null,
                     renderElements,
                     React.createElement(FieldManager_1.default, { error: errors[element.getName()], field: element })));
@@ -18511,20 +18538,28 @@ var Form = function (props) {
         });
         return renderElements;
     };
+    // Render the fields
     React.useEffect(function () {
         addedFields = [];
         setRender(recursiveRender(elements));
-    }, [elements, errors]);
+    }, [elements, errors, data]);
+    // Set the default values for each field.
+    React.useEffect(function () {
+        var formDefaultValues = defaultValues;
+        var fieldsDefaultValues = lodash_1.chain(allFields).keyBy(function (field) { return field.getName(); }).mapValues(function (field) { return field.getDefaultValue(); }).pickBy(function (value) { return isValid(value); }).value();
+        setData(__assign(__assign({}, formDefaultValues), fieldsDefaultValues));
+    }, [container]);
     var formProviderValues = {
         data: data,
         onChange: handleChange,
+        allFields: allFields
     };
     if (debug) {
         console.log(data);
     }
-    return (React.createElement("form", __assign({}, attributes),
+    return (React.createElement("form", __assign({ className: "react-fast-forms" }, attributes),
         React.createElement(exports.FormContext.Provider, { value: formProviderValues }, render),
-        React.createElement("button", { onClick: handleSubmit }, "Submit")));
+        React.createElement("button", { value: submitLabel, onClick: handleSubmit }, submitLabel)));
 };
 Form.defaultProps = {
     onSubmit: function (data) {
@@ -18534,6 +18569,8 @@ Form.defaultProps = {
     onChange: function (name, value) { },
     debug: false,
     container: null,
+    defaultValues: {},
+    submitLabel: "Submit"
 };
 Form.propTypes = {
     container: prop_types_1.default.instanceOf(builder_1.Container).isRequired
@@ -18552,10 +18589,22 @@ exports.default = Form;
 
 "use strict";
 
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var lodash_1 = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 var GenericContainer_1 = __importDefault(__webpack_require__(/*! ../elements/GenericContainer */ "./src/elements/GenericContainer.tsx"));
 var GenericField_1 = __importDefault(__webpack_require__(/*! ../elements/GenericField */ "./src/elements/GenericField.tsx"));
 var Field = /** @class */ (function () {
@@ -18566,7 +18615,7 @@ var Field = /** @class */ (function () {
         this.type = "field";
         this.validator = function (value, setError) { return null; };
         this.errorMessage = null;
-        this.value = null;
+        this.defaultValue = null;
         this.props = {};
         this.getLabel = function () {
             return _this.label;
@@ -18625,7 +18674,58 @@ var Field = /** @class */ (function () {
             return _this;
         };
         this.isRendered = function () { return _this.rendered; };
+        this.isIgnored = function () { return _this.ignored; };
+        this.setIgnored = function (ignored) {
+            if (ignored === void 0) { ignored = true; }
+            _this.ignored = ignored;
+            return _this;
+        };
+        this.setDefaultValue = function (value) {
+            _this.defaultValue = value;
+            return _this;
+        };
+        this.getDefaultValue = function () { return _this.defaultValue; };
+        this.setDependency = function (dependency) {
+            _this.dependency = dependency;
+            return _this;
+        };
+        this.getDependency = function () { return _this.dependency; };
+        this.replaceDependencies = function (replace, object) {
+            if (object === void 0) { object = null; }
+            var defaultValue;
+            if (object === null) {
+                object = __assign({}, _this.props);
+                // Replace default value.
+                if (_this.defaultValue) {
+                    defaultValue = _this.defaultValue.replace("{" + _this.getDependency() + "}", replace);
+                }
+            }
+            object = lodash_1.mapValues(object, function (value, key) {
+                if (typeof value === "object") {
+                    return _this.replaceDependencies(replace, value);
+                }
+                else if (typeof value === "string") {
+                    var newValue = value.replace("{" + _this.getDependency() + "}", replace);
+                    return newValue;
+                }
+            });
+            var clone = _this.clone();
+            clone.setDefaultValue(defaultValue);
+            clone.setProps(object);
+            return clone;
+        };
     }
+    Field.prototype.clone = function () {
+        var cloneObj = new Field();
+        cloneObj.setName(this.getName());
+        cloneObj.setRequired(this.isRequired());
+        cloneObj.setRendered(this.isRendered());
+        cloneObj.setIgnored(this.isIgnored());
+        cloneObj.setValidator(this.validator);
+        cloneObj.setLabel(this.getLabel());
+        cloneObj.setComponent(this.getComponent());
+        return cloneObj;
+    };
     return Field;
 }());
 exports.Field = Field;
@@ -18655,7 +18755,7 @@ var Container = /** @class */ (function () {
             return _this;
         };
         this.addFields = function (fields) {
-            _this.fields.concat(fields);
+            _this.fields = _this.fields.concat(fields);
             return _this;
         };
         this.getFields = function () { return _this.fields; };
@@ -18690,7 +18790,8 @@ function createField(component, name) {
     if (typeof component === "string") {
         switch (component) {
             case "textarea":
-                throw new Error("Textarea is not implemented");
+            case "select":
+                field.setProp("tag", component);
                 break;
             default:
                 field.setProp("type", component);
@@ -18806,15 +18907,32 @@ exports.default = GenericContainer;
 
 "use strict";
 
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(__webpack_require__(/*! react */ "react"));
 var hooks_1 = __webpack_require__(/*! ../hooks */ "./src/hooks.ts");
+var lodash_1 = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 var GenericField = function () {
-    var _a = hooks_1.useField({ type: "text" }), _b = _a[0], name = _b.name, value = _b.value, onChange = _b.onChange, required = _b.required, type = _a[1].type;
-    return (react_1.default.createElement("input", { type: type, name: name, value: value || "", onChange: function (e) { return onChange(e.target.value); } }));
+    var _a = hooks_1.useField({ type: "text", tag: "input" }), _b = _a[0], name = _b.name, value = _b.value, onChange = _b.onChange, required = _b.required, fieldProps = _a[1];
+    var Tag = fieldProps.tag;
+    var htmlAttributes = lodash_1.omit(fieldProps, 'tag', 'type');
+    return (fieldProps.tag == "input" ?
+        react_1.default.createElement("input", __assign({}, htmlAttributes, { type: fieldProps.type, name: name, value: value || "", onChange: function (e) { return onChange(e.target.value); } }))
+        :
+            react_1.default.createElement(Tag, __assign({}, htmlAttributes, { name: name, value: value || "", onChange: function (e) { return onChange(e.target.value); } })));
 };
 exports.default = GenericField;
 
@@ -18857,9 +18975,16 @@ exports.useContainer = function (defaultValues) {
 exports.useField = function (defaultValues) {
     if (defaultValues === void 0) { defaultValues = {}; }
     var _a = react_1.useContext(FieldManager_1.FieldContext), fieldProps = _a.fieldProps, name = _a.name;
-    var _b = react_1.useContext(Form_1.FormContext), onChange = _b.onChange, data = _b.data;
-    var handleChange = function (value) {
-        onChange(name, value);
+    var _b = react_1.useContext(Form_1.FormContext), onChange = _b.onChange, data = _b.data, allFields = _b.allFields;
+    var handleChange = function (value, fieldName) {
+        if (fieldName === void 0) { fieldName = name; }
+        var dependentFields = allFields.filter(function (field) { return field.getDependency() == name; });
+        dependentFields.forEach(function (field) {
+            var replacedField = field.replaceDependencies(value);
+            var replacedValue = replacedField.getDefaultValue();
+            onChange(field.getName(), replacedValue);
+        });
+        onChange(fieldName, value);
     };
     var newProps = lodash_1.merge(defaultValues, fieldProps);
     return [{ value: data[name], onChange: handleChange, required: false, name: name }, newProps];
