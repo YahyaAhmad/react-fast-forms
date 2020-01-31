@@ -20,7 +20,7 @@ export const isNotValid = value => {
 export const validate = (value, rule, typeOfValidation) => {
   switch (typeOfValidation) {
     case "required":
-      return !isNotValid(value);
+      return rule ? !isNotValid(value) : true;
     case "pattern":
       return rule.test(value);
     case "minLength":
