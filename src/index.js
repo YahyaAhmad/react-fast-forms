@@ -1,4 +1,5 @@
-import Form from "Form";
-import Field from "components/Field";
-import Submit from "components/Submit";
-export { Form, Submit, Field };
+import React,{useState} from 'react';
+export const Form = () => {
+    const [a,setA] = useState(null);
+    return <div>Forms</div>
+}
