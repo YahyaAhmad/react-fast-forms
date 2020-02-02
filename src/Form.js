@@ -83,7 +83,7 @@ const Form = ({
         if (!fieldValidated) {
           validated = false;
         }
-        if (!renderAllMessages) {
+        if (!renderAllMessages && !fieldValidated) {
           return false;
         }
       });

@@ -73,7 +73,7 @@ const Container = ({ name, delta, children }) => {
       if (!fieldValidated) {
         validated = false;
       }
-      if (!renderAllMessages) {
+      if (!renderAllMessages && !fieldValidated) {
         return false;
       }
     });
