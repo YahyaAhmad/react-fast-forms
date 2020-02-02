@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import PropTypes, { any, object, element, node } from "prop-types";
-import { forEach, keys } from "lodash";
+import { forEach, pickBy } from "lodash";
 import { validate, isNotValid } from "./utilities";
 export const FormContext = React.createContext(null);
 
 const Form = ({
-  onSubmit,
+  onSubmit = () => null,
   className,
   renderField,
   renderErrorMessage = message => (
@@ -14,12 +14,13 @@ const Form = ({
   requiredErrorMessage = "This field is required",
   renderAllMessages = false,
   validateOnChange = false,
+  omitInvalidValues = false,
   children,
   debug = false
 }) => {
   const [data, setData] = useState({});
   const [errors, setErrors] = useState({});
-  const [validators, setValidators] = useState([]);
+  const [validators, setValidators] = useState({});
 
   const setError = useCallback(
     (name, errorMessage) => {
@@ -66,17 +67,17 @@ const Form = ({
   const handleAllValidators = useCallback(
     validators => {
       let validated = true;
-      console.log(validators);
       forEach(validators, validatorObject => {
         const fieldName = validatorObject.name;
         const fieldValidators = validatorObject.validators;
         const errorMessages = validatorObject.messages;
-        const validated = handleValidators(
+        const fieldValidated = handleValidators(
           fieldValidators,
           fieldName,
           errorMessages
         );
-        if (!validated && !renderAllMessages) {
+        if (!fieldValidated && !renderAllMessages) {
+          validated = false;
           return false;
         }
       });
@@ -96,13 +97,17 @@ const Form = ({
 
       // Check and handle all validators.
       const validated = handleAllValidators(validators);
-
       // Pass the data to the onSubmit prop if there is no errors.
       if (validated) {
-        console.log(data);
+        let dataToSubmit = { ...data };
+        if (omitInvalidValues) {
+          // Remove any invalid value.
+          dataToSubmit = pickBy(dataToSubmit, value => !isNotValid(value));
+        }
+        onSubmit(dataToSubmit);
       }
     },
-    [errors, data]
+    [errors, data, validators]
   );
 
   /**
@@ -110,7 +115,9 @@ const Form = ({
    *
    */
   const register = validatorObject => {
-    setValidators(prev => [...prev, validatorObject]);
+    let newValidators = {};
+    newValidators[validatorObject.name] = validatorObject;
+    setValidators(prev => ({ ...prev, ...newValidators }));
   };
 
   const formContextValues = {
@@ -118,6 +125,7 @@ const Form = ({
     data,
     errors,
     setError,
+    requiredErrorMessage,
     clearErrors: () => setErrors({}),
     validators,
     validateOnChange,
@@ -130,6 +138,7 @@ const Form = ({
   useEffect(() => {
     if (debug) {
       console.log(data);
+      console.log(validators);
     }
   }, [data]);
 

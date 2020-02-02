@@ -94,23 +94,19 @@ const Field = ({
     name,
     setError: () => null
   };
+  return (
+    <div className="form-Field">
+      {errors[name] && renderErrorMessage(errors[name])}
+      {label && (
+        <label className="form-Field-Label" htmlFor={name}>
+          {label}
+        </label>
+      )}
 
-  return useMemo(
-    () => (
-      <div className="form-Field">
-        {errors[name] && renderErrorMessage(errors[name])}
-        {label && (
-          <label className="form-Field-Label" htmlFor={name}>
-            {label}
-          </label>
-        )}
-
-        <FieldContext.Provider value={fieldContextValues}>
-          <FieldComponent {...fieldProps} />
-        </FieldContext.Provider>
-      </div>
-    ),
-    [data, errors]
+      <FieldContext.Provider value={fieldContextValues}>
+        <FieldComponent {...fieldProps} />
+      </FieldContext.Provider>
+    </div>
   );
 };
 
