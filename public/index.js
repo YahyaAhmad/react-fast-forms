@@ -12,9 +12,17 @@ const FormExample = () => {
     let fields = [];
     for (let i = 0; i <= delta; i++) {
       fields.push(
-        <Container delta={i} name="section">
+        <Container key={i} delta={i} name="section">
           <Field required label="Sur.Name" component="text" name="surName" />
-          <Field label="Sur.Name 2" component="text" name="surName2" />
+          <Field
+            validators={{ pattern: /^test/ }}
+            errorMessages={{
+              pattern: "Something is wrong!"
+            }}
+            label="Sur.Name 2"
+            component="text"
+            name="surName2"
+          />
         </Container>
       );
     }
@@ -22,9 +30,16 @@ const FormExample = () => {
   };
 
   return (
-    <Form omitInvalidValues onSubmit={handleSubmit} validateOnChange>
+    <Form
+      removeErrorsOnChange
+      renderAllMessages
+      omitInvalidValues
+      onSubmit={handleSubmit}
+      validateOnChange
+    >
+      <Field name="Tet" required component="text"/>
       {renderFields()}
-      <button onClick={() => setDelta(delta + 1)}>Add Fields</button>
+      <input onClick={() => setDelta(delta + 1)} type="button" value="ADd" />
       <Submit label="Submit" />
     </Form>
   );

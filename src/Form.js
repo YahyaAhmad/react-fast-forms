@@ -13,7 +13,7 @@ const Form = ({
   ),
   requiredErrorMessage = "This field is required",
   renderAllMessages = false,
-  validateOnChange = false,
+  removeErrorsOnChange = false,
   omitInvalidValues = false,
   children,
   debug = false
@@ -33,6 +33,10 @@ const Form = ({
 
   const handleChange = useCallback(
     (name, value) => {
+      if (removeErrorsOnChange) {
+        setErrors({});
+      }
+
       let newData = {};
       newData[name] = value;
       setData(prev => ({ ...prev, ...newData }));
@@ -76,8 +80,10 @@ const Form = ({
           fieldName,
           errorMessages
         );
-        if (!fieldValidated && !renderAllMessages) {
+        if (!fieldValidated) {
           validated = false;
+        }
+        if (!renderAllMessages) {
           return false;
         }
       });
@@ -97,6 +103,7 @@ const Form = ({
 
       // Check and handle all validators.
       const validated = handleAllValidators(validators);
+      console.log(validated);
       // Pass the data to the onSubmit prop if there is no errors.
       if (validated) {
         let dataToSubmit = { ...data };
@@ -125,10 +132,12 @@ const Form = ({
     data,
     errors,
     setError,
+    removeErrorsOnChange,
     requiredErrorMessage,
+    handleErrorMessage,
+    renderAllMessages,
     clearErrors: () => setErrors({}),
     validators,
-    validateOnChange,
     handleValidators,
     register,
     renderErrorMessage

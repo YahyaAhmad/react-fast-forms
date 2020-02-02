@@ -28,6 +28,7 @@ export const validate = (value, rule, typeOfValidation) => {
     case "maxLength":
       return value.length <= rule;
     case "function":
+      console.log(rule());
       return rule(value);
   }
 };

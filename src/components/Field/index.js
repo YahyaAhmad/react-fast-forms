@@ -24,7 +24,7 @@ const Field = ({
     clearErrors,
     renderErrorMessage,
     validateOnChange,
-    handleValidators
+    handleErrorMessage
   } = useContext(FormContext);
   const [initialized, setInitialized] = useState(false);
   const allValidators = { required, ...validators };
@@ -33,18 +33,6 @@ const Field = ({
 
   const handleChange = value => {
     onChange(name, value);
-
-    // If the field is required but the value is not valid (empty, null, etc...) after we set the default value
-    if (validateOnChange) {
-      forEach(allValidators, (rule, typeOfValidation) => {
-        if (!validate(value, rule, typeOfValidation)) {
-          setError(name, errorMessages[typeOfValidation]);
-          return false;
-        } else {
-          clearErrors();
-        }
-      });
-    }
   };
 
   // Register the validator.
