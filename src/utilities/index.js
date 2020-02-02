@@ -18,17 +18,25 @@ export const isNotValid = value => {
  * @param {string} typeOfValidation
  */
 export const validate = (value, rule, typeOfValidation) => {
-  switch (typeOfValidation) {
-    case "required":
-      return rule ? !isNotValid(value) : true;
-    case "pattern":
-      return rule.test(value);
-    case "minLength":
-      return value.length >= rule;
-    case "maxLength":
-      return value.length <= rule;
-    case "function":
-      return rule(value);
+  // Don't run other validators if the value is not entered.
+  if (typeOfValidation == "required") {
+    return rule ? !isNotValid(value) : true;
+  }
+
+  // Run these validators only if the value is valid.
+  if (!isNotValid(value)) {
+    switch (typeOfValidation) {
+      case "pattern":
+        return rule.test(value);
+      case "minLength":
+        return value.length >= rule;
+      case "maxLength":
+        return value.length <= rule;
+      case "function":
+        return rule(value);
+    }
+  } else {
+    return true;
   }
 };
 

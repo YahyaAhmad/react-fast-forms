@@ -31,15 +31,10 @@ const FormExample = () => {
 
   return (
     <Form
-      removeErrorsOnChange
-      renderAllMessages
-      omitInvalidValues
       onSubmit={handleSubmit}
-      validateOnChange
     >
       <Field name="Tet" required component="text"/>
-      {renderFields()}
-      <input onClick={() => setDelta(delta + 1)} type="button" value="ADd" />
+      <Field name="Tet2" required component="text"/>
       <Submit label="Submit" />
     </Form>
   );

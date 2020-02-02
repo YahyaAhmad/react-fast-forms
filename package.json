@@ -6,7 +6,7 @@
   "types": "./src/index.d.ts",
   "scripts": {
     "start": "./scripts/kill-server.sh | webpack-dev-server --config webpack.dev.js",
-    "build":"webpack --config webpack.prod.js --mode development",
+    "build": "webpack --config webpack.prod.js --mode development",
     "test": "test"
   },
   "repository": {
@@ -37,9 +37,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.15",
-    "prop-types": "^15.7.2"
-  },
-  "peerDependencies": {
+    "prop-types": "^15.7.2",
     "react": "16.12.0",
     "react-dom": "16.12.0"
   }
