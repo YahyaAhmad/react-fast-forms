@@ -103,7 +103,6 @@ const Form = ({
 
       // Check and handle all validators.
       const validated = handleAllValidators(validators);
-      console.log(validated);
       // Pass the data to the onSubmit prop if there is no errors.
       if (validated) {
         let dataToSubmit = { ...data };

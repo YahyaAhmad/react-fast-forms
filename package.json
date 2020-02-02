@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "Build fast react forms using hooks",
   "main": "dist/main.js",
+  "types": "./src/index.d.ts",
   "scripts": {
     "start": "./scripts/kill-server.sh | webpack-dev-server --config webpack.dev.js",
     "build":"webpack --config webpack.prod.js --mode development",

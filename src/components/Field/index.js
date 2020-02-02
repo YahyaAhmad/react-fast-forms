@@ -2,13 +2,14 @@ import React, { useEffect, useContext, useState, useMemo } from "react";
 import GenericField from "components/GenericField";
 import { FormContext } from "Form";
 import { forEach } from "lodash";
-import { validate } from "utilities";
+import { validate, classNames } from "utilities";
 export const FieldContext = React.createContext(null);
 
 const Field = ({
   label,
   component,
   name,
+  className,
   defaultValue = "",
   required = false,
   validators = {},
@@ -83,7 +84,9 @@ const Field = ({
     setError: () => null
   };
   return (
-    <div className="form-Field">
+    <div
+      className={classNames(["form-Field", `form-Field-${name}`, className])}
+    >
       {errors[name] && renderErrorMessage(errors[name])}
       {label && (
         <label className="form-Field-Label" htmlFor={name}>
