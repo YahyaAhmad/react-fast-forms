@@ -9,7 +9,7 @@ const Field = ({
   label,
   component,
   name,
-  className,
+  fieldClassName,
   defaultValue = "",
   required = false,
   validators = {},
@@ -32,8 +32,8 @@ const Field = ({
   let FieldComponent,
     fieldProps = {};
 
-  const handleChange = value => {
-    onChange(name, value);
+  const handleChange = (value, fieldName = name) => {
+    onChange(fieldName, value);
   };
 
   // Register the validator.
@@ -68,7 +68,7 @@ const Field = ({
     case "string":
       FieldComponent = GenericField;
       // Pass the string in the field props as a type prop for the input.
-      fieldProps = { type: component };
+      fieldProps = { ...rest, type: component };
       break;
     default:
       throw new Error(
@@ -85,7 +85,11 @@ const Field = ({
   };
   return (
     <div
-      className={classNames(["form-Field", `form-Field-${name}`, className])}
+      className={classNames([
+        "form-Field",
+        `form-Field-${name}`,
+        fieldClassName
+      ])}
     >
       {errors[name] && renderErrorMessage(errors[name])}
       {label && (
