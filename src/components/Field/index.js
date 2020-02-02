@@ -9,6 +9,7 @@ const Field = ({
   label,
   component,
   name,
+  onChange,
   fieldClassName,
   defaultValue = "",
   required = false,
@@ -16,8 +17,8 @@ const Field = ({
   errorMessages = {},
   ...rest
 }) => {
+  const formContextData = useContext(FormContext);
   const {
-    onChange,
     data,
     register,
     errors,
@@ -26,14 +27,18 @@ const Field = ({
     renderErrorMessage,
     validateOnChange,
     handleErrorMessage
-  } = useContext(FormContext);
+  } = formContextData;
+  const parentOnChange = formContextData.onChange;
   const [initialized, setInitialized] = useState(false);
   const allValidators = { required, ...validators };
   let FieldComponent,
     fieldProps = {};
 
   const handleChange = (value, fieldName = name) => {
-    onChange(fieldName, value);
+    parentOnChange(fieldName, value);
+    if (onChange) {
+      onChange(value);
+    }
   };
 
   // Register the validator.

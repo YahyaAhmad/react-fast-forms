@@ -1,13 +1,14 @@
 export const isNotValid = value => {
-  switch (value) {
-    case null:
-    case undefined:
-    case []:
-    case "":
-      return true;
-    default:
-      return false;
+  if (value === null || value === undefined) {
+    return true;
   }
+  if (Array.isArray(value) && value.length == 0) {
+    return true;
+  }
+  if (value === "") {
+    return true;
+  }
+  return false;
 };
 
 /**
