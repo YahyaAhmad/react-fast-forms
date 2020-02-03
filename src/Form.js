@@ -8,6 +8,7 @@ const Form = ({
   onSubmit = () => null,
   className,
   renderField,
+  defaultValues = {},
   renderErrorMessage = message => (
     <div className="form-ErrorMessage">{message}</div>
   ),
@@ -18,7 +19,7 @@ const Form = ({
   children,
   debug = false
 }) => {
-  const [data, setData] = useState({});
+  const [data, setData] = useState(defaultValues);
   const [errors, setErrors] = useState({});
   const [validators, setValidators] = useState({});
 
@@ -33,6 +34,9 @@ const Form = ({
 
   const handleChange = useCallback(
     (name, value) => {
+      if (value == "" && data[name]) {
+        return;
+      }
       if (removeErrorsOnChange) {
         setErrors({});
       }

@@ -32,8 +32,9 @@ const FormExample = () => {
   return (
     <Form
       onSubmit={handleSubmit}
+      defaultValues={{Tet2: "test222"}}
     >
-      <Field name="Tet" required component="text"/>
+      <Field name="Tet" component="text"/>
       <Field name="Tet2" required component="text"/>
       <Submit label="Submit" />
     </Form>

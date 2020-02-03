@@ -15,6 +15,7 @@ declare module "react-fast-forms" {
     removeErrorsOnChange: boolean;
     omitInvalidValues: boolean;
     debug: boolean;
+    defaultValues;
   }
 
   interface Validators {
@@ -39,7 +40,7 @@ declare module "react-fast-forms" {
     label?: string;
     component: React.Component | HTML5InputTypes;
     name: string;
-    className: string;
+    fieldClassName: string;
     defaultValue?: any;
     required?: boolean;
     validators?: Validators;
