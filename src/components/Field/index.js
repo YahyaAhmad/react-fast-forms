@@ -11,7 +11,7 @@ const Field = ({
   name,
   onChange,
   fieldClassName,
-  defaultValue = "",
+  defaultValue,
   required = false,
   validators = {},
   errorMessages = {},
@@ -35,7 +35,7 @@ const Field = ({
     fieldProps = {};
 
   const handleChange = (value, fieldName = name) => {
-    parentOnChange(fieldName, value);
+    parentOnChange.current(fieldName, value);
     if (onChange) {
       onChange(value);
     }
@@ -53,11 +53,6 @@ const Field = ({
 
   // Set the default value.
   useEffect(() => {
-    if (typeof defaultValue === "undefined" || defaultValue === null) {
-      throw new Error(
-        `Default value for field "${name}" can't be undefined or null"`
-      );
-    }
     handleChange(defaultValue);
     setInitialized(true);
   }, []);

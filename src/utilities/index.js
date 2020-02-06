@@ -1,11 +1,11 @@
 export const isNotValid = value => {
-  if (value === null || value === undefined) {
+  if (value === null || typeof value === "undefined") {
     return true;
   }
   if (Array.isArray(value) && value.length == 0) {
     return true;
   }
-  if (value === "") {
+  if (value == "") {
     return true;
   }
   return false;

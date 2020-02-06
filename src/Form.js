@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import PropTypes, { any, object, element, node } from "prop-types";
-import { forEach, pickBy } from "lodash";
+import { forEach, pickBy, omit } from "lodash";
 import { validate, isNotValid } from "./utilities";
 export const FormContext = React.createContext(null);
 
@@ -19,9 +19,10 @@ const Form = ({
   children,
   debug = false
 }) => {
-  const [data, setData] = useState(defaultValues);
+  const [data, setData] = useState({});
   const [errors, setErrors] = useState({});
   const [validators, setValidators] = useState({});
+  const [fields, setFields] = useState([]);
 
   const setError = useCallback(
     (name, errorMessage) => {
@@ -34,7 +35,8 @@ const Form = ({
 
   const handleChange = useCallback(
     (name, value) => {
-      if (value == "" && data[name]) {
+      console.log(value);
+      if (value == null && defaultValues[name]) {
         return;
       }
       if (removeErrorsOnChange) {
@@ -130,8 +132,23 @@ const Form = ({
     setValidators(prev => ({ ...prev, ...newValidators }));
   };
 
+  const handleDelete = (name, delta) => {
+    let newData = { ...data };
+    newData[name] = omit(newData[name], delta);
+    setData(newData);
+  };
+
+  const onDelete = React.useRef(handleDelete);
+  const onChange = React.useRef(handleChange);
+
+  useEffect(() => {
+    onDelete.current = handleDelete;
+    onChange.current = handleChange;
+  });
+
   const formContextValues = {
-    onChange: handleChange,
+    onChange: onChange,
+    onDelete: onDelete,
     data,
     errors,
     setError,
@@ -150,9 +167,13 @@ const Form = ({
   useEffect(() => {
     if (debug) {
       console.log(data);
-      console.log(validators);
     }
   }, [data]);
+
+  // Set the default values.
+  useEffect(() => {
+    setData(defaultValues);
+  }, []);
 
   return (
     <FormContext.Provider value={formContextValues}>
