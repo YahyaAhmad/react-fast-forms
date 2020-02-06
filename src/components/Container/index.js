@@ -7,7 +7,7 @@ const Container = ({ children, name, delta }) => {
 
   // Check props.
   useEffect(() => {
-    if (!name || !delta) {
+    if (!name || typeof delta == "undefined" || delta === null) {
       throw new Error("Name and delta should be set.");
     }
   }, []);

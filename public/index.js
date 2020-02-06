@@ -1,42 +1,43 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { Field, Form, Submit, Container } from "index";
+import { Field, Form, Submit, Container, useField } from "index";
 
 const FormExample = () => {
-  const [delta, setDelta] = useState(0);
-  const handleSubmit = data => {
-    console.log(data);
-  };
+  const [itemsDelta, setItemsDelta] = useState([]);
 
-  const renderFields = () => {
-    let fields = [];
-    for (let i = 0; i <= delta; i++) {
-      fields.push(
-        <Container key={i} delta={i} name="section">
-          <Field required label="Sur.Name" component="text" name="surName" />
-          <Field
-            validators={{ pattern: /^test/ }}
-            errorMessages={{
-              pattern: "Something is wrong!"
-            }}
-            label="Sur.Name 2"
-            component="text"
-            name="surName2"
-          />
-        </Container>
-      );
-    }
-    return fields;
+  const renderItems = () => {
+    return itemsDelta.map(delta => (
+      <Container key={delta} name="section" delta={delta}>
+        <Field component="text" name="test1" label="Test1" />
+        <Field component="text" name="test2" label="Test2" />
+        <button
+          type="button"
+          onClick={() =>
+            setItemsDelta(itemsDelta.filter(iDelta => iDelta != delta))
+          }
+        >
+          Delete
+        </button>
+      </Container>
+    ));
   };
 
   return (
-    <Form
-      onSubmit={handleSubmit}
-      defaultValues={{Tet2: "test222"}}
-    >
-      <Field name="Tet" component="text"/>
-      <Field name="Tet2" required component="text"/>
-      <Submit label="Submit" />
+    <Form onSubmit={data => console.log(data)} debug>
+      <Field component="text" name="text" label="Test"  />
+      <Field component={LanguageForm} name="language" label="Test" required />
+      <button>Submit</button>
+    </Form>
+  );
+};
+
+const LanguageForm = () => {
+  const { onChange } = useField();
+  return (
+    <Form onSubmit={e => console.log(e)}>
+        <Field component="text" name="text1" label="Test1" required />
+        <Field component="text" name="text2" label="Test2" required />
+      <Submit />
     </Form>
   );
 };
