@@ -25,6 +25,7 @@ const Field = ({
     setError,
     clearErrors,
     renderErrorMessage,
+    renderField,
     validateOnChange,
     handleErrorMessage
   } = formContextData;
@@ -91,16 +92,17 @@ const Field = ({
         fieldClassName
       ])}
     >
-      {errors[name] && renderErrorMessage(errors[name])}
-      {label && (
-        <label className="form-Field-Label" htmlFor={name}>
-          {label}
-        </label>
+      {renderField(
+        errors[name] && renderErrorMessage(errors[name]),
+        label && (
+          <label className="form-Field-Label" htmlFor={name}>
+            {label}
+          </label>
+        ),
+        <FieldContext.Provider value={fieldContextValues}>
+          <FieldComponent {...fieldProps} />
+        </FieldContext.Provider>
       )}
-
-      <FieldContext.Provider value={fieldContextValues}>
-        <FieldComponent {...fieldProps} />
-      </FieldContext.Provider>
     </div>
   );
 };

@@ -4,10 +4,18 @@ import { forEach, pickBy, omit } from "lodash";
 import { validate, isNotValid } from "./utilities";
 export const FormContext = React.createContext(null);
 
+const defaultField = (error, label, field) => (
+  <>
+    {error}
+    {label}
+    {field}
+  </>
+);
+
 const Form = ({
   onSubmit = () => null,
   className,
-  renderField,
+  renderField = defaultField,
   defaultValues = {},
   renderErrorMessage = message => (
     <div className="form-ErrorMessage">{message}</div>
@@ -35,8 +43,8 @@ const Form = ({
 
   const handleChange = useCallback(
     (name, value) => {
-      console.log(value);
-      if (value == null && defaultValues[name]) {
+      console.log(name,value);
+      if (value === undefined && defaultValues[name]) {
         return;
       }
       if (removeErrorsOnChange) {
@@ -155,6 +163,7 @@ const Form = ({
     removeErrorsOnChange,
     requiredErrorMessage,
     handleErrorMessage,
+    renderField,
     renderAllMessages,
     clearErrors: () => setErrors({}),
     validators,
