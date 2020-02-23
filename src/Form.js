@@ -43,7 +43,6 @@ const Form = ({
 
   const handleChange = useCallback(
     (name, value) => {
-      console.log(name,value);
       if (value === undefined && defaultValues[name]) {
         return;
       }
