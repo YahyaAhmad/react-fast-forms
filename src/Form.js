@@ -53,11 +53,14 @@ const Form = ({
 
       let newData = {};
       newData[name] = value;
-      onFormChange(newData);
       setData((prev) => ({ ...prev, ...newData }));
     },
     [data]
   );
+
+  useEffect(() => {
+    onFormChange(data);
+  }, [data]);
 
   const handleErrorMessage = (typeOfValidator, errorMessages) => {
     const errorMessage = errorMessages[typeOfValidator];
