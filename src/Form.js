@@ -17,7 +17,7 @@ const Form = ({
   className,
   renderField = defaultField,
   defaultValues = {},
-  renderErrorMessage = message => (
+  renderErrorMessage = (message) => (
     <div className="form-ErrorMessage">{message}</div>
   ),
   requiredErrorMessage = "This field is required",
@@ -25,7 +25,8 @@ const Form = ({
   removeErrorsOnChange = false,
   omitInvalidValues = false,
   children,
-  debug = false
+  onFormChange = () => null,
+  debug = false,
 }) => {
   const [data, setData] = useState({});
   const [errors, setErrors] = useState({});
@@ -36,7 +37,7 @@ const Form = ({
     (name, errorMessage) => {
       let newErrors = {};
       newErrors[name] = errorMessage;
-      setErrors(prev => ({ ...prev, ...newErrors }));
+      setErrors((prev) => ({ ...prev, ...newErrors }));
     },
     [errors]
   );
@@ -52,7 +53,8 @@ const Form = ({
 
       let newData = {};
       newData[name] = value;
-      setData(prev => ({ ...prev, ...newData }));
+      onFormChange(newData);
+      setData((prev) => ({ ...prev, ...newData }));
     },
     [data]
   );
@@ -82,9 +84,9 @@ const Form = ({
   };
 
   const handleAllValidators = useCallback(
-    validators => {
+    (validators) => {
       let validated = true;
-      forEach(validators, validatorObject => {
+      forEach(validators, (validatorObject) => {
         const fieldName = validatorObject.name;
         const fieldValidators = validatorObject.validators;
         const errorMessages = validatorObject.messages;
@@ -107,7 +109,7 @@ const Form = ({
   );
 
   const handleSubmit = useCallback(
-    e => {
+    (e) => {
       // Clear errors.
       setErrors({});
 
@@ -121,7 +123,7 @@ const Form = ({
         let dataToSubmit = { ...data };
         if (omitInvalidValues) {
           // Remove any invalid value.
-          dataToSubmit = pickBy(dataToSubmit, value => !isNotValid(value));
+          dataToSubmit = pickBy(dataToSubmit, (value) => !isNotValid(value));
         }
         onSubmit(dataToSubmit);
       }
@@ -133,10 +135,10 @@ const Form = ({
    * Lets Field components register their validators
    *
    */
-  const register = validatorObject => {
+  const register = (validatorObject) => {
     let newValidators = {};
     newValidators[validatorObject.name] = validatorObject;
-    setValidators(prev => ({ ...prev, ...newValidators }));
+    setValidators((prev) => ({ ...prev, ...newValidators }));
   };
 
   const handleDelete = (name, delta) => {
@@ -168,7 +170,7 @@ const Form = ({
     validators,
     handleValidators,
     register,
-    renderErrorMessage
+    renderErrorMessage,
   };
 
   // Debug the changes on the data.
@@ -204,7 +206,7 @@ Form.propTypes = {
   renderErrorMessage: PropTypes.func,
   requiredErrorMessage: PropTypes.string,
   renderAllMessages: PropTypes.bool,
-  validateOnChange: PropTypes.bool
+  validateOnChange: PropTypes.bool,
 };
 
 export default Form;
