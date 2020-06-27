@@ -69,4 +69,5 @@ declare module "react-fast-forms" {
   export class Container extends React.Component<ContainerProps> {}
   export class Submit extends React.Component<SubmitProps> {}
   export function useField(): FieldContext {}
+  export function useData(): any {}
 }
