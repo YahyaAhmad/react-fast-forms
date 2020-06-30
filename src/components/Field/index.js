@@ -4,7 +4,6 @@ import { FormContext } from "Form";
 import { forEach } from "lodash";
 import { validate, classNames } from "utilities";
 export const FieldContext = React.createContext(null);
-
 const Field = ({
   label,
   component,
@@ -21,26 +20,35 @@ const Field = ({
   const {
     data,
     register,
+    unregister,
     errors,
     setError,
     clearErrors,
     renderErrorMessage,
     renderField,
     validateOnChange,
-    handleErrorMessage
+    handleErrorMessage,
   } = formContextData;
   const parentOnChange = formContextData.onChange;
   const [initialized, setInitialized] = useState(false);
   const allValidators = { required, ...validators };
   let FieldComponent,
     fieldProps = {};
-
   const handleChange = (value, fieldName = name) => {
     parentOnChange.current(fieldName, value);
     if (onChange) {
       onChange(value);
     }
   };
+  // Register the validator.
+  useEffect(() => {
+    // Register.
+    register({
+      name,
+      validators: allValidators,
+      messages: errorMessages,
+    });
+  }, []);
 
   // Register the validator.
   useEffect(() => {
@@ -48,16 +56,15 @@ const Field = ({
     register({
       name,
       validators: allValidators,
-      messages: errorMessages
+      messages: errorMessages,
     });
-  }, []);
+  }, [required]);
 
   // Set the default value.
   useEffect(() => {
     handleChange(defaultValue);
     setInitialized(true);
   }, []);
-
   switch (typeof component) {
     // If it is a react component, load the component that was given by the user.
     case "function":
@@ -76,20 +83,19 @@ const Field = ({
         `Invalid component supplied. Expected a string or a React Component, instead, was given ${typeof component}`
       );
   }
-
   // Provide the context with the desired handlers and values.
   const fieldContextValues = {
     onChange: handleChange,
     value: data[name],
     name,
-    setError: () => null
+    setError: () => null,
   };
   return (
     <div
       className={classNames([
         "form-Field",
         `form-Field-${name}`,
-        fieldClassName
+        fieldClassName,
       ])}
     >
       {renderField(
@@ -106,5 +112,4 @@ const Field = ({
     </div>
   );
 };
-
 export default Field;

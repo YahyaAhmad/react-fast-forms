@@ -3,7 +3,6 @@ import PropTypes, { any, object, element, node } from "prop-types";
 import { forEach, pickBy, omit } from "lodash";
 import { validate, isNotValid } from "./utilities";
 export const FormContext = React.createContext(null);
-
 const defaultField = (error, label, field) => (
   <>
     {error}
@@ -11,7 +10,6 @@ const defaultField = (error, label, field) => (
     {field}
   </>
 );
-
 const Form = ({
   onSubmit = () => null,
   className,
@@ -32,7 +30,6 @@ const Form = ({
   const [errors, setErrors] = useState({});
   const [validators, setValidators] = useState({});
   const [fields, setFields] = useState([]);
-
   const setError = useCallback(
     (name, errorMessage) => {
       let newErrors = {};
@@ -41,7 +38,6 @@ const Form = ({
     },
     [errors]
   );
-
   const handleChange = useCallback(
     (name, value) => {
       if (value === undefined && defaultValues[name]) {
@@ -50,18 +46,15 @@ const Form = ({
       if (removeErrorsOnChange) {
         setErrors({});
       }
-
       let newData = {};
       newData[name] = value;
       setData((prev) => ({ ...prev, ...newData }));
     },
     [data]
   );
-
   useEffect(() => {
     onFormChange(data);
   }, [data]);
-
   const handleErrorMessage = (typeOfValidator, errorMessages) => {
     const errorMessage = errorMessages[typeOfValidator];
     switch (typeOfValidator) {
@@ -73,7 +66,6 @@ const Form = ({
           : `Default error message of type ${typeOfValidator}`;
     }
   };
-
   const handleValidators = (fieldValidators, fieldName, errorMessages) => {
     let validated = true;
     forEach(fieldValidators, (rule, typeOfValidator) => {
@@ -85,7 +77,6 @@ const Form = ({
     });
     return validated;
   };
-
   const handleAllValidators = useCallback(
     (validators) => {
       let validated = true;
@@ -105,20 +96,16 @@ const Form = ({
           return false;
         }
       });
-
       return validated;
     },
     [data]
   );
-
   const handleSubmit = useCallback(
     (e) => {
       // Clear errors.
       setErrors({});
-
       // Prevent the from from refreshing.
       e.preventDefault();
-
       // Check and handle all validators.
       const validated = handleAllValidators(validators);
       // Pass the data to the onSubmit prop if there is no errors.
@@ -133,7 +120,6 @@ const Form = ({
     },
     [errors, data, validators]
   );
-
   /**
    * Lets Field components register their validators
    *
@@ -143,21 +129,22 @@ const Form = ({
     newValidators[validatorObject.name] = validatorObject;
     setValidators((prev) => ({ ...prev, ...newValidators }));
   };
-
+  const unregister = (validatorObject) => {
+    let newValidators = { ...validators };
+    newValidators = omit(newValidators, validatorObject.name);
+    setValidators(newValidators);
+  };
   const handleDelete = (name, delta) => {
     let newData = { ...data };
     newData[name] = omit(newData[name], delta);
     setData(newData);
   };
-
   const onDelete = React.useRef(handleDelete);
   const onChange = React.useRef(handleChange);
-
   useEffect(() => {
     onDelete.current = handleDelete;
     onChange.current = handleChange;
   });
-
   const formContextValues = {
     onChange: onChange,
     onDelete: onDelete,
@@ -173,21 +160,19 @@ const Form = ({
     validators,
     handleValidators,
     register,
+    unregister,
     renderErrorMessage,
   };
-
   // Debug the changes on the data.
   useEffect(() => {
     if (debug) {
       console.log(data);
     }
   }, [data]);
-
   // Set the default values.
   useEffect(() => {
     setData(defaultValues);
   }, []);
-
   return (
     <FormContext.Provider value={formContextValues}>
       <form
@@ -199,7 +184,6 @@ const Form = ({
     </FormContext.Provider>
   );
 };
-
 Form.propTypes = {
   onSubmit: PropTypes.func,
   className: PropTypes.string,
@@ -211,5 +195,4 @@ Form.propTypes = {
   renderAllMessages: PropTypes.bool,
   validateOnChange: PropTypes.bool,
 };
-
 export default Form;

@@ -4,16 +4,17 @@ import { Field, Form, Submit, Container, useField } from "index";
 
 const FormExample = () => {
   const [itemsDelta, setItemsDelta] = useState([]);
+  const [someState, setSomeState] = useState(false);
 
   const renderItems = () => {
-    return itemsDelta.map(delta => (
+    return itemsDelta.map((delta) => (
       <Container key={delta} name="section" delta={delta}>
         <Field component="text" name="test1" label="Test1" />
         <Field component="text" name="test2" label="Test2" />
         <button
           type="button"
           onClick={() =>
-            setItemsDelta(itemsDelta.filter(iDelta => iDelta != delta))
+            setItemsDelta(itemsDelta.filter((iDelta) => iDelta != delta))
           }
         >
           Delete
@@ -23,21 +24,10 @@ const FormExample = () => {
   };
 
   return (
-    <Form onSubmit={data => console.log(data)} debug>
-      <Field component="text" name="text" label="Test"  />
-      <Field component={LanguageForm} name="language" label="Test" required />
+    <Form onSubmit={(data) => console.log(data)} debug>
+      <Field component="text" name="text" label="Test" required={someState} />
+      <button onClick={() => setSomeState(!someState)}>Sta</button>
       <button>Submit</button>
-    </Form>
-  );
-};
-
-const LanguageForm = () => {
-  const { onChange } = useField();
-  return (
-    <Form onSubmit={e => console.log(e)}>
-        <Field component="text" name="text1" label="Test1" required />
-        <Field component="text" name="text2" label="Test2" required />
-      <Submit />
     </Form>
   );
 };
