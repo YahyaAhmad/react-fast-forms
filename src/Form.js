@@ -153,11 +153,10 @@ const Form = ({
   const onDelete = React.useRef(handleDelete);
   const onChange = React.useRef(handleChange);
   const unregister = React.useRef(handleUnregister);
-
+  unregister.current = handleUnregister;
   useEffect(() => {
     onDelete.current = handleDelete;
     onChange.current = handleChange;
-    unregister.current = handleUnregister;
   });
 
   const formContextValues = {
