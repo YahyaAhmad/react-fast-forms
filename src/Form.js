@@ -38,6 +38,7 @@ const Form = ({
       let newData = { ...data };
       newData = omitBy(newData, (value, key) => key == lastUnregister);
       setData(newData);
+      setLastUnregister(null);
     }
   }, [lastUnregister]);
 
