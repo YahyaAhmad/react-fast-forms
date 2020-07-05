@@ -15,6 +15,10 @@ declare module "react-fast-forms" {
     removeErrorsOnChange: boolean;
     omitInvalidValues: boolean;
     debug: boolean;
+    validateForm: (
+      values: Record<string, any>,
+      setError: (name: string, errorMessage: string) => void
+    ) => boolean;
     defaultValues;
   }
 

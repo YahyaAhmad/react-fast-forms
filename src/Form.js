@@ -23,6 +23,7 @@ const Form = ({
   removeErrorsOnChange = false,
   omitInvalidValues = false,
   children,
+  validateForm = (values) => true,
   onFormChange = () => null,
   debug = false,
 }) => {
@@ -107,7 +108,9 @@ const Form = ({
       // Prevent the from from refreshing.
       e.preventDefault();
       // Check and handle all validators.
-      const validated = handleAllValidators(validators);
+      let validated = handleAllValidators(validators);
+      // Call the global validate function.
+      validated = validateForm(data, setError);
       // Pass the data to the onSubmit prop if there is no errors.
       if (validated) {
         let dataToSubmit = { ...data };
@@ -145,6 +148,7 @@ const Form = ({
     onDelete.current = handleDelete;
     onChange.current = handleChange;
   });
+
   const formContextValues = {
     onChange: onChange,
     onDelete: onDelete,

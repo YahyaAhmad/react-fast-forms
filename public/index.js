@@ -4,29 +4,18 @@ import { Field, Form, Submit, Container, useField } from "index";
 
 const FormExample = () => {
   const [itemsDelta, setItemsDelta] = useState([]);
-  const [someState, setSomeState] = useState(false);
 
-  const renderItems = () => {
-    return itemsDelta.map((delta) => (
-      <Container key={delta} name="section" delta={delta}>
-        <Field component="text" name="test1" label="Test1" />
-        <Field component="text" name="test2" label="Test2" />
-        <button
-          type="button"
-          onClick={() =>
-            setItemsDelta(itemsDelta.filter((iDelta) => iDelta != delta))
-          }
-        >
-          Delete
-        </button>
-      </Container>
-    ));
+  const validation = (values, setError) => {
+    if (values["text"] == "error") {
+      setError("text", "Error is not allowed");
+      return false;
+    }
+    return true;
   };
 
   return (
-    <Form onSubmit={(data) => console.log(data)} debug>
-      <Field component="text" name="text" label="Test" required={someState} />
-      <button onClick={() => setSomeState(!someState)}>Sta</button>
+    <Form onSubmit={(data) => console.log(data)} validateForm={validation}>
+      <Field component="text" name="text" label="Test" />
       <button>Submit</button>
     </Form>
   );
