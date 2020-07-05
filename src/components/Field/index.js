@@ -48,17 +48,12 @@ const Field = ({
       validators: allValidators,
       messages: errorMessages,
     });
-  }, []);
 
-  // Register the validator.
-  useEffect(() => {
-    // Register.
-    register({
-      name,
-      validators: allValidators,
-      messages: errorMessages,
-    });
-  }, [required]);
+    return () => {
+      console.log("Unregister");
+      unregister(name);
+    };
+  }, []);
 
   // Set the default value.
   useEffect(() => {

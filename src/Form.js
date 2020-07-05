@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import PropTypes, { any, object, element, node } from "prop-types";
-import { forEach, pickBy, omit } from "lodash";
+import { forEach, pickBy, omit, remove, omitBy } from "lodash";
 import { validate, isNotValid } from "./utilities";
 export const FormContext = React.createContext(null);
 const defaultField = (error, label, field) => (
@@ -125,6 +125,7 @@ const Form = ({
     },
     [errors, data, validators]
   );
+
   /**
    * Lets Field components register their validators
    *
@@ -134,10 +135,15 @@ const Form = ({
     newValidators[validatorObject.name] = validatorObject;
     setValidators((prev) => ({ ...prev, ...newValidators }));
   };
-  const unregister = (validatorObject) => {
+  const handleUnregister = (name) => {
     let newValidators = { ...validators };
-    newValidators = omit(newValidators, validatorObject.name);
+    newValidators = omit(newValidators, name);
     setValidators(newValidators);
+
+    // Remove the value.
+    let newData = { ...data };
+    newData = omitBy(newData, (value, key) => key == name);
+    setData(newData);
   };
   const handleDelete = (name, delta) => {
     let newData = { ...data };
@@ -146,9 +152,12 @@ const Form = ({
   };
   const onDelete = React.useRef(handleDelete);
   const onChange = React.useRef(handleChange);
+  const unregister = React.useRef(handleUnregister);
+
   useEffect(() => {
     onDelete.current = handleDelete;
     onChange.current = handleChange;
+    unregister.current = handleUnregister;
   });
 
   const formContextValues = {
@@ -166,7 +175,7 @@ const Form = ({
     validators,
     handleValidators,
     register,
-    unregister,
+    unregister: unregister.current,
     renderErrorMessage,
   };
   // Debug the changes on the data.
