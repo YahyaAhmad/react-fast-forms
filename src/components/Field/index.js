@@ -50,7 +50,6 @@ const Field = ({
     });
 
     return () => {
-      console.log("Unregister");
       unregister(name);
     };
   }, []);

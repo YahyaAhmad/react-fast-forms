@@ -30,7 +30,17 @@ const Form = ({
   const [data, setData] = useState({});
   const [errors, setErrors] = useState({});
   const [validators, setValidators] = useState({});
+  const [lastUnregister, setLastUnregister] = useState(null);
   const [fields, setFields] = useState([]);
+
+  useEffect(() => {
+    if (lastUnregister) {
+      let newData = { ...data };
+      newData = omitBy(newData, (value, key) => key == lastUnregister);
+      setData(newData);
+    }
+  }, [lastUnregister]);
+
   const setError = useCallback(
     (name, errorMessage) => {
       let newErrors = {};
@@ -56,6 +66,7 @@ const Form = ({
   useEffect(() => {
     onFormChange(data);
   }, [data]);
+
   const handleErrorMessage = (typeOfValidator, errorMessages) => {
     const errorMessage = errorMessages[typeOfValidator];
     switch (typeOfValidator) {
@@ -67,6 +78,7 @@ const Form = ({
           : `Default error message of type ${typeOfValidator}`;
     }
   };
+
   const handleValidators = (fieldValidators, fieldName, errorMessages) => {
     let validated = true;
     forEach(fieldValidators, (rule, typeOfValidator) => {
@@ -141,9 +153,7 @@ const Form = ({
     setValidators(newValidators);
 
     // Remove the value.
-    let newData = { ...data };
-    newData = omitBy(newData, (value, key) => key == name);
-    setData(newData);
+    setLastUnregister(name);
   };
   const handleDelete = (name, delta) => {
     let newData = { ...data };
@@ -154,10 +164,8 @@ const Form = ({
   const onChange = React.useRef(handleChange);
   const unregister = React.useRef(handleUnregister);
   unregister.current = handleUnregister;
-  useEffect(() => {
-    onDelete.current = handleDelete;
-    onChange.current = handleChange;
-  });
+  onDelete.current = handleDelete;
+  onChange.current = handleChange;
 
   const formContextValues = {
     onChange: onChange,
