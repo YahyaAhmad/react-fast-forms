@@ -110,7 +110,9 @@ const Form = ({
       // Check and handle all validators.
       let validated = handleAllValidators(validators);
       // Call the global validate function.
-      validated = validateForm(data, setError);
+      if (validated) {
+        validated = validateForm(data, setError);
+      }
       // Pass the data to the onSubmit prop if there is no errors.
       if (validated) {
         let dataToSubmit = { ...data };
